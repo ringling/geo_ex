@@ -4,7 +4,7 @@ defmodule GeoEx.Mixfile do
   def project do
     [app: :geo_ex,
      version: "0.0.1",
-     elixir: "~> 0.13.2-dev",
+     # elixir: "~> 0.13.2-dev",
      deps: deps]
   end
 

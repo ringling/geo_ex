@@ -59,6 +59,45 @@ defmodule SimpleFeatures do
       EllipsoidalCalculations.distance(p1, p2, a, b)
     end
 
+    # # Orthogonal Distance
+    # # Based http://www.allegro.cc/forums/thread/589720
+    # def orthogonal_distance(line, tail \\ nil) do
+    #   head, tail  = tail ?  [line, tail] : [line[0], line[-1]]
+    #   a, b = @x - head.x, @y - head.y
+    #   c, d = tail.x - head.x, tail.y - head.y
+
+    #   dot = a * c + b * d
+    #   len = c * c + d * d
+    #   return 0.0 if len.zero?
+    #   res = dot / len
+
+    #   xx, yy =\
+    #   if res < 0
+    #     [head.x, head.y]
+    #   elsif res > 1
+    #     [tail.x, tail.y]
+    #   else
+    #     [head.x + res * c, head.y + res * d]
+    #   end
+    #   # todo benchmark if worth creating an instance
+    #   # euclidian_distance(Point.from_x_y(xx, yy))
+    #   Math.sqrt((@x - xx) ** 2 + (@y - yy) ** 2)
+    # end
+
+    # Bearing from a point to another, in degrees.
+    def bearing_to(p1, p2) do
+      Bearing.bearing_to(p1, p2)
+    end
+
+    def bearing_text(p1, p2) do
+      bearing = SimpleFeatures.Point.bearing_to(p1,p2)
+      Bearing.bearing_text(bearing)
+    end
+
+    def text_geometry_type do
+      'POINT'
+    end
+
     defp from_coord([x, y], srid) do
       %Point{x: x, y: y, lat: x, lng: y, srid: srid}
     end
