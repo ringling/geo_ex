@@ -1,4 +1,5 @@
 defmodule EllipsoidalCalculations do
+  import Geometry
 
   # Ellipsoidal distance in m using Vincenty's formula. Lifted entirely from Chris Veness's code at http://www.movable-type.co.uk/scripts/LatLongVincenty.html and adapted for Ruby. Assumes the x and y are the lon and lat in degrees.
   # a is the semi-major axis (equatorial radius) of the ellipsoid
@@ -7,10 +8,10 @@ defmodule EllipsoidalCalculations do
   def distance(p1, p2, a, b) do
 
     f = (a - b) / a
-    l = (p2.lng - p1.lng) * SimpleFeatures.Point.deg2rad
+    l = (p2.lng - p1.lng) * deg2rad
 
-    u1 = :math.atan((1-f) * :math.tan(p1.lat * SimpleFeatures.Point.deg2rad))
-    u2 = :math.atan((1-f) * :math.tan(p2.lat * SimpleFeatures.Point.deg2rad))
+    u1 = :math.atan((1-f) * :math.tan(p1.lat * deg2rad))
+    u2 = :math.atan((1-f) * :math.tan(p2.lat * deg2rad))
 
     sinU1 = :math.sin(u1)
     cosU1 = :math.cos(u1)
