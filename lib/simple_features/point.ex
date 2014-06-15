@@ -1,7 +1,7 @@
 defmodule SimpleFeatures.Point do
   import Geometry
 
-  defstruct x: 0.0, y: 0.0, z: 0.0, m: 0.0, srid: 4326, lat: nil, lng: nil
+  defstruct x: nil, y: nil, z: nil, m: nil, srid: nil, lat: nil, lng: nil
 
   # alias :lon :x
   # alias :lng :x
@@ -62,27 +62,44 @@ defmodule SimpleFeatures.Point do
   # # Orthogonal Distance
   # # Based http://www.allegro.cc/forums/thread/589720
   def orthogonal_distance(point, line, tail \\ nil) do
-    1.414
-  #   head, tail  = tail ?  [line, tail] : [line[0], line[-1]]
-  #   a, b = @x - head.x, @y - head.y
-  #   c, d = tail.x - head.x, tail.y - head.y
+    # head, tail  = tail ?  [line, tail] : [line[0], line[-1]]
+    [ head , _tail ] = line.points
+    tail = List.last line.points
+    [a, b] = [point.x - head.x, point.y - head.y]
+    [c, d] = [tail.x - head.x, tail.y - head.y]
 
-  #   dot = a * c + b * d
-  #   len = c * c + d * d
-  #   return 0.0 if len.zero?
-  #   res = dot / len
+    dot = a * c + b * d
+    len = c * c + d * d
+    res = dot / len
 
-  #   xx, yy =\
-  #   if res < 0
-  #     [head.x, head.y]
-  #   elsif res > 1
-  #     [tail.x, tail.y]
-  #   else
-  #     [head.x + res * c, head.y + res * d]
-  #   end
-  #   # todo benchmark if worth creating an instance
-  #   # euclidian_distance(Point.from_x_y(xx, yy))
-  #   Math.sqrt((@x - xx) ** 2 + (@y - yy) ** 2)
+    if len == 0 do
+      0.0
+    else
+      calculate_ort_dist(res, head, tail, c, d, point)
+    end
+  end
+
+  defp calculate_ort_dist(res, head, tail, c, d, point) do
+    [xx, yy] = calc_xx_yy(res, head, tail, c, d)
+    # todo benchmark if worth creating an instance
+    # euclidian_distance(Point.from_x_y(xx, yy))
+    dist = :math.sqrt(
+      :math.pow((point.x - xx), 2) +
+      :math.pow((point.y - yy), 2)
+      )
+    dist
+  end
+
+  defp calc_xx_yy(res, head, tail, _c, _d) when res > 1 do
+    [tail.x, tail.y]
+  end
+
+  defp calc_xx_yy(res, head, _tail, _c, _d) when res < 0 do
+    [head.x, head.y]
+  end
+
+  defp calc_xx_yy(res, head, _tail, c, d) do
+    [head.x + res * c, head.y + res * d]
   end
 
   # Bearing from a point to another, in degrees.

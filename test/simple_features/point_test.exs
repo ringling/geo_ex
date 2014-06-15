@@ -107,17 +107,19 @@ defmodule PointTest do
 
   # Orthogonal Distance
 
-  # def line do
-  #   SimpleFeatures.LineString.from_coordinates([[0,0],[1,3]], 4326)
-  # end
+  def line do
+    SimpleFeatures.LineString.from_coordinates([[0,0],[1,3]], 4326)
+  end
 
-  # def line2 do
-  #   SimpleFeatures.LineString.from_coordinates([[1,1],[1,2]], 4326)
-  # end
+  def line2 do
+    SimpleFeatures.LineString.from_coordinates([[1,1],[1,2]], 4326)
+  end
 
-  # test "calcula orthogonal distance from a line (90 deg)" do
-  #   assert SimpleFeatures.Point.orthogonal_distance(p1, line) == 1.414
-  # end
+  test "calcula orthogonal distance from a line (90 deg)" do
+    # assert SimpleFeatures.Point.orthogonal_distance(p1, line2) == 0.0
+    # assert SimpleFeatures.Point.orthogonal_distance(p2, line) == 0.0
+    assert SimpleFeatures.Point.orthogonal_distance(p1, line) == 1.4142135623730951
+  end
 
   # test "should calcula orthogonal distance very close..." do
   #   p1.orthogonal_distance(line2).should be_zero
