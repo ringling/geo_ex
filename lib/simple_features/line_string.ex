@@ -2,7 +2,7 @@ defmodule SimpleFeatures.LineString do
   import Geometry
 
   @moduledoc """
-  Documentation for my module. With **formatting**.
+  Represents a line string as an array of points (see Point).
   """
 
   # defdelegate as_ewkt(line_string, allow_srid, allow_z, allow_m), to: Geometry
