@@ -11,7 +11,23 @@ defmodule PolygonTest do
     assert SimpleFeatures.Polygon.contains_point?(@poly, SimpleFeatures.Point.from_x_y(5, 5)) == false
   end
 
-   #no test of the binary representation for linear_rings : always with polygons and like line_string
+  test "bbox" do
+    polygon = SimpleFeatures.Polygon.from_coordinates([[[12.4,-45.3,15.2],[45.4,41.6,2.4],[4.456,1.0698,5.6],[12.4,-45.3,6.1]],[[2.4,5.3,4.5],[5.4,1.4263,4.2],[14.46,1.06,123.1],[2.4,5.3,4.4]]],4326,false)
+    bbox = SimpleFeatures.Polygon.bounding_box(polygon)
+    assert length(bbox) == 2
+    [first, second] = bbox
+    assert first == SimpleFeatures.Point.from_x_y_z(4.456,-45.3,2.4, 4326)
+    assert second == SimpleFeatures.Point.from_x_y_z(45.4,41.6,123.1, 4326)
+  end
+
+  test "to_coordinates" do
+    coordinates = [[[12.4,-45.3,15.2],[45.4,41.6,2.4],[4.456,1.0698,5.6],[12.4,-45.3,6.1]],[[2.4,5.3,4.5],[5.4,1.4263,4.2],[14.46,1.06,123.1],[2.4,5.3,4.4]]]
+    polygon = SimpleFeatures.Polygon.from_coordinates(coordinates,4326,false)
+    assert SimpleFeatures.Polygon.to_coordinates(polygon) == coordinates
+  end
+
+  #no test of the binary representation for linear_rings : always with polygons and like line_string
+
     # it "should test_polygon_creation" do
     #   linear_ring1 = GeoRuby::SimpleFeatures::LinearRing.from_coordinates([[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],256)
     #   linear_ring2 = GeoRuby::SimpleFeatures::LinearRing.from_coordinates([[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]],256)
@@ -63,12 +79,7 @@ defmodule PolygonTest do
     #   polygon[1].should == linear_ring2
     # end
 
-    # it "bbox" do
-    #   bbox = GeoRuby::SimpleFeatures::Polygon.from_coordinates([[[12.4,-45.3,15.2],[45.4,41.6,2.4],[4.456,1.0698,5.6],[12.4,-45.3,6.1]],[[2.4,5.3,4.5],[5.4,1.4263,4.2],[14.46,1.06,123.1],[2.4,5.3,4.4]]],256,true).bounding_box
-    #   bbox.length.should eql(2)
-    #   bbox[0].should == GeoRuby::SimpleFeatures::Point.from_x_y_z(4.456,-45.3,2.4)
-    #   bbox[1].should == GeoRuby::SimpleFeatures::Point.from_x_y_z(45.4,41.6,123.1)
-    # end
+
 
 
     # it "test_polygon_equal" do

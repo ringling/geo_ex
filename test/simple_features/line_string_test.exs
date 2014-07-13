@@ -74,6 +74,11 @@ defmodule LineStringTest do
     assert SimpleFeatures.LineString.closed?(line_string)
   end
 
+  test "to_coordinates" do
+    line_string = SimpleFeatures.LineString.from_coordinates([[0,0],[1,1],[2,1],[4,0]],256)
+    assert SimpleFeatures.LineString.to_coordinates(line_string) == [[0,0],[1,1],[2,1],[4,0]]
+  end
+
   test "is not closed" do
     line_string = SimpleFeatures.LineString.from_coordinates([[0,0],[1,1],[2,1],[4,0]],256)
     assert SimpleFeatures.LineString.closed?(line_string) == false

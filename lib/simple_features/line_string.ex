@@ -31,6 +31,10 @@ defmodule SimpleFeatures.LineString do
     Enum.map_join(line.points, ",", &(SimpleFeatures.Point.text_representation(&1, allow_z, allow_m)))
   end
 
+  def to_coordinates(line_string) do
+    line_string.points |> Enum.map fn(point) -> SimpleFeatures.Point.to_coordinates(point) end
+  end
+
   @doc """
   Does this linear string contain the given point?  We use the
   algorithm described here:
@@ -149,7 +153,7 @@ defmodule SimpleFeatures.LineString do
   def as_ewkt(line, allow_srid \\ true, allow_z \\ true, allow_m \\ true) do
     srid = srid_text(line, allow_srid)
     m = m_text(line, allow_m, allow_z)
-    text_rep = text_representation(line, with_z(line), with_m(line))
+    text_rep = text_representation(line, with_z?(line), with_m?(line))
     "#{srid}#{line.text_geometry_type}#{m}(#{text_rep})"
   end
 
@@ -158,23 +162,24 @@ defmodule SimpleFeatures.LineString do
   end
 
   defp m_text(line, allow_m, allow_z) do
-    if with_m(line) && allow_m && (!with_z(line) || !allow_z), do: "M", else: ""
+    if with_m?(line) && allow_m && (!with_z?(line) || !allow_z), do: "M", else: ""
   end
 
-  defp with_z(line) do
-    Enum.any?(line.points, fn(point) -> point.z != nil end)
+  def with_z?(line) do
+    Enum.any?(line.points, fn(point) -> SimpleFeatures.Point.with_z?(point) end)
   end
 
-  defp with_m(line) do
-    Enum.any?(line.points, fn(point) -> point.m != nil end)
+  def with_m?(line) do
+    Enum.any?(line.points, fn(point) -> SimpleFeatures.Point.with_m?(point) end)
   end
 
   #Bounding box in 2D/3D. Returns an array of 2 points
   def bounding_box(line) do
-    { max_x, min_x, max_y, min_y, max_z, min_z } = Enum.reduce(line.points, { nil, nil, nil, nil, nil, nil },
+    { max_x, min_x, max_y, min_y, max_z, min_z } =
+    Enum.reduce(line.points, { nil, nil, nil, nil, nil, nil },
       fn(point, current) ->
-        min_max(current, { point.x, point.y, point.z }) end
-    )
+        min_max(current, { point.x, point.y, point.z })
+      end)
     [to_point(min_x, min_y, min_z), to_point(max_x, max_y, max_z)]
   end
 

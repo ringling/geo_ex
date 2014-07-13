@@ -10,17 +10,23 @@ defmodule SimpleFeatures.Polygon do
 
   @doc "Creates a polygon. Accept a sequence of line_string coordinates as argument : ((x,y)...(x,y))"
   def from_coordinates(coordinates, srid, with_m) do
-    linear_rings = Enum.map coordinates, fn(coordinate) -> SimpleFeatures.LineString.from_coordinates(coordinate, srid, with_m) end
+    linear_rings =
+      coordinates |> Enum.map fn(coordinate) -> SimpleFeatures.LineString.from_coordinates(coordinate, srid, with_m) end
     %SimpleFeatures.Polygon{rings: linear_rings, srid: srid}
   end
 
   @doc "Creates a polygon. Accept a sequence of line_string coordinates as argument : ((x,y)...(x,y))"
   def from_coordinates(coordinates, srid \\ default_srid) do
-    linear_rings = Enum.map coordinates, fn(coordinate) -> SimpleFeatures.LineString.from_coordinates(coordinate, srid) end
+    linear_rings =
+      coordinates |> Enum.map fn(coordinate) -> SimpleFeatures.LineString.from_coordinates(coordinate, srid) end
     %SimpleFeatures.Polygon{rings: linear_rings, srid: srid}
   end
 
-  # Contains a point?
+  def to_coordinates(polygon) do
+    polygon.rings |> Enum.map fn(ring) -> SimpleFeatures.LineString.to_coordinates(ring) end
+  end
+
+  @doc "Does polygon contain point?"
   def contains_point?(polygon, point) do
     res = polygon.rings
     |> Enum.filter(fn(lr) -> SimpleFeatures.LineString.contains_point?(lr, point) end)
@@ -28,11 +34,44 @@ defmodule SimpleFeatures.Polygon do
     !res
   end
 
+  @doc "Bounding box in 2D/3D. Returns an array of 2 points"
+  def bounding_box(polygon) do
+    [first, _rest ] = polygon.rings
+    result = first |> SimpleFeatures.LineString.bounding_box #valid for x and y
+    unless with_z?(polygon) do
+      result
+    else
+      [ min, max ] = result
+      size = length(polygon.rings)
+      { max_z, min_z } = Enum.reduce(1..size-1,{ max.z, min.z }, fn(index, acc) ->
+        { max_z, min_z } = acc
+        [sw,ne] =
+          Enum.at(polygon.rings, index)
+          |> SimpleFeatures.LineString.bounding_box
+        if ne.z > max_z || max_z == nil, do: max_z = ne.z
+        if sw.z < min_z || min_z == nil, do: min_z = sw.z
+        { max_z, min_z }
+      end)
+
+      _bbox(result, max_z, min_z)
+    end
+  end
+
+  defp _bbox(res = [fst, sec], max_z, min_z) do
+    a = SimpleFeatures.Point.from_x_y_z_m(fst.x, fst.y, min_z, fst.m, fst.srid)
+    b = SimpleFeatures.Point.from_x_y_z_m(sec.x, sec.y, max_z, sec.m, sec.srid)
+    [a,b]
+  end
+
+  def with_z?(polygon) do
+    polygon.rings |> Enum.any? fn(ring) -> SimpleFeatures.LineString.with_z?(ring) end
+  end
+
+  def with_m?(polygon) do
+    polygon.rings |> Enum.any? fn(ring) -> SimpleFeatures.LineString.with_m?(ring) end
+  end
+
 end
-
-
-
-
 
 # require 'geo_ruby/simple_features/geometry'
 
@@ -56,24 +95,7 @@ end
 #         @rings.send(method_name,*args,&b)
 #       end
 
-#       #Bounding box in 2D/3D. Returns an array of 2 points
-#       def bounding_box
-#         unless with_z
-#           @rings[0].bounding_box
-#         else
-#           result = @rings[0].bounding_box #valid for x and y
-#           max_z, min_z = result[1].z, result[0].z
-#           1.upto(size - 1) do |index|
-#             bbox = @rings[index].bounding_box
-#             sw = bbox[0]
-#             ne = bbox[1]
-#             max_z = ne.z if ne.z > max_z
-#             min_z = sw.z if sw.z < min_z
-#           end
-#           result[1].z, result[0].z = max_z, min_z
-#           result
-#         end
-#       end
+
 
 #       def m_range
 #         if with_m

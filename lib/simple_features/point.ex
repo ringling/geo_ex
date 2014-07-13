@@ -19,6 +19,14 @@ defmodule SimpleFeatures.Point do
     [point, point]
   end
 
+  def with_z?(point) do
+    point.z != nil
+  end
+
+  def with_m?(point) do
+    point.m != nil
+  end
+
   def from_x_y(x, y, srid \\ 0) do
     %SimpleFeatures.Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
@@ -167,6 +175,15 @@ defmodule SimpleFeatures.Point do
   def bearing_text(p1, p2) do
     bearing = SimpleFeatures.Point.bearing_to(p1,p2)
     Bearing.bearing_text(bearing)
+  end
+
+  # TODO Perhaps should support with_m analogous to from_coordinates?
+  def to_coordinates(point) do
+    if with_z?(point) do
+      [point.x, point.y, point.z]
+    else
+      [point.x, point.y]
+    end
   end
 
   def text_representation(point, true, false) do #:nodoc:

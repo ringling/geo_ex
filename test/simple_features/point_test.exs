@@ -23,6 +23,41 @@ defmodule PointTest do
     assert @p1.text_geometry_type == "POINT"
   end
 
+  test "to x y coordinates with m" do
+    point = SimpleFeatures.Point.from_x_y_m(10, 20, 123)
+    assert SimpleFeatures.Point.to_coordinates(point) == [10,20]
+  end
+
+  test "to x y coordinates without m" do
+    point = SimpleFeatures.Point.from_x_y(10, 20)
+    assert SimpleFeatures.Point.to_coordinates(point) == [10,20]
+  end
+
+  test "to x y z coordinates" do
+    point = SimpleFeatures.Point.from_x_y_z(10, 20, 30, 123)
+    assert SimpleFeatures.Point.to_coordinates(point) == [10,20,30]
+  end
+
+  test "with z" do
+    point = SimpleFeatures.Point.from_x_y_z(10, 20, 30, 123)
+    assert SimpleFeatures.Point.with_z?(point) == true
+  end
+
+  test "without z" do
+    point = SimpleFeatures.Point.from_x_y(10, 20, 123)
+    assert SimpleFeatures.Point.with_z?(point) == false
+  end
+
+  test "with_m" do
+    point = SimpleFeatures.Point.from_x_y_z_m(10, 20, 30, 123)
+    assert SimpleFeatures.Point.with_m?(point) == true
+  end
+
+  test "without_m" do
+    point = SimpleFeatures.Point.from_x_y_z(10, 20, 30, 123)
+    assert SimpleFeatures.Point.with_m?(point) == false
+  end
+
   test "returns a 3d point" do
     point = SimpleFeatures.Point.from_x_y_z(10, 20, 30, 123)
     assert point.x == 10
