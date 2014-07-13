@@ -76,7 +76,7 @@ defmodule SimpleFeatures.Point do
     r * c
   end
 
-  # Outputs theta - TODO ugly code
+  @doc "Outputs theta - TODO ugly code"
   def theta_rad(p) do
     _theta_rad(p.x, p.y)
   end
@@ -90,21 +90,22 @@ defmodule SimpleFeatures.Point do
     if r(x, y) > 0, do: th + 2 * :math.pi, else: th
   end
 
-  # Outputs theta in degrees
+  @doc "Outputs theta in degrees"
   def theta_deg(p) do
     theta_rad(p) / deg2rad
   end
 
-  # Outputs an array containing polar distance and theta
+  @doc "Outputs an array containing polar distance and theta"
   def as_polar(p) do
     [r(p), theta_deg(p)]
   end
 
-  # Polar stuff
-  #
-  # http://www.engineeringtoolbox.com/converting-cartesian-polar-coordinates-d_1347.html
-  # http://rcoordinate.rubyforge.org/svn/point.rb
-  # outputs radium
+  @doc """
+  Polar stuff
+  http://www.engineeringtoolbox.com/converting-cartesian-polar-coordinates-d_1347.html
+  http://rcoordinate.rubyforge.org/svn/point.rb
+  outputs radium
+  """
   def r(p) do
     r(p.x,p.y)
   end
@@ -117,10 +118,11 @@ defmodule SimpleFeatures.Point do
     EllipsoidalCalculations.distance(p1, p2, a, b)
   end
 
-
-  # Possible BUG, I'm not sure calculates correct
-  # # Orthogonal Distance
-  # # Based http://www.allegro.cc/forums/thread/589720
+  @doc """
+  Possible BUG, I'm not sure calculates correct (Thomas Ringling - 20140713)
+  Orthogonal Distance
+  Based http://www.allegro.cc/forums/thread/589720
+  """
   def orthogonal_distance(point, line, tail \\ nil) do # TODO tail not nil, is not tested
     [head, tail] = head_tail(line, tail)
     [a, b] = [point.x - head.x, point.y - head.y]
@@ -146,13 +148,10 @@ defmodule SimpleFeatures.Point do
 
   defp calculate_ort_dist(res, head, tail, c, d, point) do
     [xx, yy] = calc_xx_yy(res, head, tail, c, d)
-    # todo benchmark if worth creating an instance
-    # euclidian_distance(Point.from_x_y(xx, yy))
     :math.sqrt(
       :math.pow((point.x - xx), 2) +
       :math.pow((point.y - yy), 2)
     )
-
   end
 
   defp calc_xx_yy(res, _head, tail, _c, _d) when res > 1 do
@@ -167,7 +166,7 @@ defmodule SimpleFeatures.Point do
     [head.x + res * c, head.y + res * d]
   end
 
-  # Bearing from a point to another, in degrees.
+  @doc "Bearing from a point to another, in degrees."
   def bearing_to(p1, p2) do
     Bearing.bearing_to(p1, p2)
   end
@@ -177,7 +176,7 @@ defmodule SimpleFeatures.Point do
     Bearing.bearing_text(bearing)
   end
 
-  # TODO Perhaps should support with_m analogous to from_coordinates?
+  @doc "TODO Perhaps should support with_m analogous to from_coordinates?"
   def to_coordinates(point) do
     if with_z?(point) do
       [point.x, point.y, point.z]
@@ -206,12 +205,14 @@ defmodule SimpleFeatures.Point do
     "#{point.x} #{point.y}"
   end
 
-  # outputs the geometry in kml format : options are
-  # <tt>:id</tt>, <tt>:tesselate</tt>, <tt>:extrude</tt>,
-  # <tt>:altitude_mode</tt>.
-  # If the altitude_mode option is not present, the Z (if present)
-  # will not be output (since it won't be used by GE anyway:
-  # clampToGround is the default)
+  @doc """
+  outputs the geometry in kml format : options are
+  <tt>:id</tt>, <tt>:tesselate</tt>, <tt>:extrude</tt>,
+  <tt>:altitude_mode</tt>.
+  If the altitude_mode option is not present, the Z (if present)
+  will not be output (since it won't be used by GE anyway:
+  clampToGround is the default)
+  """
   def kml_representation(point, options \\ %{}) do #:nodoc:
     out = "<Point#{id_attr(options)}>\n"
     if options[:geom_data], do: out = out <> options[:geom_data]

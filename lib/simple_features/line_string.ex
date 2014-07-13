@@ -105,8 +105,10 @@ defmodule SimpleFeatures.LineString do
     { current_point, fun.(previous_point, current_point) + sum }
   end
 
-  # Simplify linestring (Douglas Peucker Algorithm)
-  # http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
+  @doc """
+  Simplify linestring (Douglas Peucker Algorithm)
+  http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
+  """
   def simplify(line, epsilon \\ 1) do
     from_points(do_simplify(line.points, epsilon))
   end
@@ -147,9 +149,7 @@ defmodule SimpleFeatures.LineString do
     )
   end
 
-  #
-  # Outputs the geometry as an EWKT string.
-  #
+  @doc "Outputs the geometry as an EWKT string."
   def as_ewkt(line, allow_srid \\ true, allow_z \\ true, allow_m \\ true) do
     srid = srid_text(line, allow_srid)
     m = m_text(line, allow_m, allow_z)
@@ -173,7 +173,7 @@ defmodule SimpleFeatures.LineString do
     Enum.any?(line.points, fn(point) -> SimpleFeatures.Point.with_m?(point) end)
   end
 
-  #Bounding box in 2D/3D. Returns an array of 2 points
+  @doc "Bounding box in 2D/3D. Returns an array of 2 points"
   def bounding_box(line) do
     { max_x, min_x, max_y, min_y, max_z, min_z } =
     Enum.reduce(line.points, { nil, nil, nil, nil, nil, nil },

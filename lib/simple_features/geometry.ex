@@ -12,5 +12,8 @@ defmodule Geometry do
     1.5707963267948966
   end
 
+  def reverse(boolean) do
+    !boolean
+  end
 
 end

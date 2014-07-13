@@ -1,7 +1,6 @@
 defmodule SimpleFeatures.Polygon do
   import Geometry
 
-
   defstruct rings: [], srid: default_srid, binary_geometry_type: 3, text_geometry_type: "POLYGON"
 
   @moduledoc """
@@ -28,39 +27,28 @@ defmodule SimpleFeatures.Polygon do
 
   @doc "Does polygon contain point?"
   def contains_point?(polygon, point) do
-    res = polygon.rings
+    polygon.rings
     |> Enum.filter(fn(lr) -> SimpleFeatures.LineString.contains_point?(lr, point) end)
     |> Enum.empty?
-    !res
+    |> reverse
   end
 
   @doc "Bounding box in 2D/3D. Returns an array of 2 points"
   def bounding_box(polygon) do
-    [first, _rest ] = polygon.rings
-    result = first |> SimpleFeatures.LineString.bounding_box #valid for x and y
+    result = hd(polygon.rings) |> SimpleFeatures.LineString.bounding_box #valid for x and y
     unless with_z?(polygon) do
       result
     else
       [ min, max ] = result
-      size = length(polygon.rings)
-      { max_z, min_z } = Enum.reduce(1..size-1,{ max.z, min.z }, fn(index, acc) ->
-        { max_z, min_z } = acc
-        [sw,ne] =
+      range(polygon)
+      |> Enum.reduce({ max.z, min.z },
+        fn(index, acc) ->
           Enum.at(polygon.rings, index)
           |> SimpleFeatures.LineString.bounding_box
-        if ne.z > max_z || max_z == nil, do: max_z = ne.z
-        if sw.z < min_z || min_z == nil, do: min_z = sw.z
-        { max_z, min_z }
-      end)
-
-      _bbox(result, max_z, min_z)
+          |> min_max(acc)
+        end)
+      |> bbox(result)
     end
-  end
-
-  defp _bbox(res = [fst, sec], max_z, min_z) do
-    a = SimpleFeatures.Point.from_x_y_z_m(fst.x, fst.y, min_z, fst.m, fst.srid)
-    b = SimpleFeatures.Point.from_x_y_z_m(sec.x, sec.y, max_z, sec.m, sec.srid)
-    [a,b]
   end
 
   def with_z?(polygon) do
@@ -71,31 +59,23 @@ defmodule SimpleFeatures.Polygon do
     polygon.rings |> Enum.any? fn(ring) -> SimpleFeatures.LineString.with_m?(ring) end
   end
 
+  defp range(polygon) do
+    1..length(polygon.rings)-1
+  end
+
+  defp min_max([ sw,ne ], acc) do
+    { max_z, min_z } = acc
+    if ne.z > max_z, do: max_z = ne.z
+    if sw.z < min_z, do: min_z = sw.z
+    { max_z, min_z }
+  end
+
+  defp bbox({ max_z, min_z },[fst, sec] ) do
+    a = SimpleFeatures.Point.from_x_y_z_m(fst.x, fst.y, min_z, fst.m, fst.srid)
+    b = SimpleFeatures.Point.from_x_y_z_m(sec.x, sec.y, max_z, sec.m, sec.srid)
+    [a,b]
+  end
 end
-
-# require 'geo_ruby/simple_features/geometry'
-
-# module GeoRuby
-
-#   module SimpleFeatures
-
-#     # Represents a polygon as an array of linear rings (see LinearRing).
-#     # No check is performed regarding the validity of the geometries forming the polygon.
-#     class Polygon < Geometry
-#       #the list of rings forming the polygon
-#       attr_reader :rings
-
-#       def initialize(srid = DEFAULT_SRID,with_z=false,with_m=false)
-#         super(srid,with_z,with_m)
-#         @rings = []
-#       end
-
-#       #Delegate the unknown methods to the rings array
-#       def method_missing(method_name,*args,&b)
-#         @rings.send(method_name,*args,&b)
-#       end
-
-
 
 #       def m_range
 #         if with_m
@@ -111,21 +91,6 @@ end
 #         end
 #       end
 
-#       #tests for other equality. The SRID is not taken into account.
-#       def ==(other_polygon)
-#         if other_polygon.class != self.class or
-#             length != other_polygon.length
-#           false
-#         else
-#           index=0
-#           while index<length
-#             return false if self[index] != other_polygon[index]
-#             index+=1
-#           end
-#           true
-#         end
-#       end
-
 #       #binary representation of a polygon, without the headers neccessary for a valid WKB string
 #       def binary_representation(allow_z=true,allow_m=true)
 #         rep = [length].pack("V")
@@ -133,24 +98,9 @@ end
 #         rep
 #       end
 
-#       #WKB geometry type
-#       def binary_geometry_type
-#         3
-#       end
-
 #       #Text representation of a polygon
 #       def text_representation(allow_z=true,allow_m=true)
 #         @rings.collect{|line_string| "(" + line_string.text_representation(allow_z,allow_m) + ")" }.join(",")
-#       end
-
-#       #WKT geometry type
-#       def text_geometry_type
-#         "POLYGON"
-#       end
-
-#       # Contains a point?
-#       def contains_point?(point)
-#         !@rings.select { |lr| lr.contains_point? point }.empty?
 #       end
 
 #       #georss simple representation : outputs only the outer ring
@@ -193,10 +143,6 @@ end
 #         result += "</Polygon>\n"
 #       end
 
-#       def to_coordinates
-#         rings.map{|lr| lr.to_coordinates}
-#       end
-
 #       def as_json(options = {})
 #         {:type => 'Polygon',
 #          :coordinates => self.to_coordinates}
@@ -216,13 +162,6 @@ end
 #         polygon
 #       end
 
-#       #creates a new polygon. Accepts a sequence of points as argument : ((x,y)....(x,y)),((x,y).....(x,y))
-#       def self.from_coordinates(point_sequences,srid=DEFAULT_SRID,with_z=false,with_m=false)
-#         polygon = new(srid,with_z,with_m)
-#         polygon.concat( point_sequences.map {|points| LinearRing.from_coordinates(points,srid,with_z,with_m) } )
-#         polygon
-#       end
-
 #       #creates a new polygon from a list of Points (pt1....ptn),(pti....ptj)
 #       def self.from_points(point_sequences, srid=DEFAULT_SRID,with_z=false,with_m=false)
 #         polygon = new(srid,with_z,with_m)
@@ -233,5 +172,3 @@ end
 #     end
 
 #   end
-
-# end

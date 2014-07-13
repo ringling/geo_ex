@@ -1,10 +1,12 @@
 defmodule EllipsoidalCalculations do
   import Geometry
 
-  # Ellipsoidal distance in m using Vincenty's formula. Lifted entirely from Chris Veness's code at http://www.movable-type.co.uk/scripts/LatLongVincenty.html and adapted for Ruby. Assumes the x and y are the lon and lat in degrees.
-  # a is the semi-major axis (equatorial radius) of the ellipsoid
-  # b is the semi-minor axis (polar radius) of the ellipsoid
-  # Their values by default are set to the ones of the WGS84 ellipsoid
+  @doc """
+  Ellipsoidal distance in m using Vincenty's formula. Lifted entirely from Chris Veness's code at http://www.movable-type.co.uk/scripts/LatLongVincenty.html and adapted for Ruby. Assumes the x and y are the lon and lat in degrees.
+  a is the semi-major axis (equatorial radius) of the ellipsoid
+  b is the semi-minor axis (polar radius) of the ellipsoid
+  Their values by default are set to the ones of the WGS84 ellipsoid
+  """
   def distance(p1, p2, a, b) do
 
     f = (a - b) / a
