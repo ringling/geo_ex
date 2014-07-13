@@ -2,7 +2,7 @@ defmodule SimpleFeatures.LineString do
   import Geometry
 
   @moduledoc """
-  Represents a line string as an array of points (see Point).
+  Represents a line string as an list of points (see Point).
   """
 
   # defdelegate as_ewkt(line_string, allow_srid, allow_z, allow_m), to: Geometry
@@ -29,6 +29,31 @@ defmodule SimpleFeatures.LineString do
   #Text representation of a line string
   def text_representation(line, allow_z \\ true, allow_m \\ true) do
     Enum.map_join(line.points, ",", &(SimpleFeatures.Point.text_representation(&1, allow_z, allow_m)))
+  end
+
+  @doc """
+  Does this linear string contain the given point?  We use the
+  algorithm described here:
+  http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+  """
+  def contains_point?(linear_ring, point) do
+    if !linear_ring?(linear_ring), do: raise "Not a linear ring"
+    [x, y] = [point.x, point.y]
+    [ head | tail ] = linear_ring.points
+    tuples = List.zip([linear_ring.points, List.flatten([tail, head])])
+    crossings = Enum.filter(tuples, fn(tuple) ->
+      {a, b} = tuple;
+      (b.y > y != a.y > y) && (x < (a.x - b.x) * (y - b.y) / (a.y - b.y) + b.x)
+    end)
+
+    rem(length(crossings), 2) == 1
+  end
+
+  @doc """
+  is it linear_ring, alias closed?
+  """
+  def linear_ring?(line_string) do
+    closed?(line_string)
   end
 
   @doc """

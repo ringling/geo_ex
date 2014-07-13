@@ -162,8 +162,6 @@ defmodule PointTest do
   end
 
   # > Export Formats
-
-
   test "print nicely" do
     assert SimpleFeatures.Point.text_representation(@point) == "-11.2431 32.3141"
   end

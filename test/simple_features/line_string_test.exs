@@ -108,15 +108,24 @@ defmodule LineStringTest do
     assert second == SimpleFeatures.Point.from_coordinates([6,15], 4326)
   end
 
-  # end
+  test "if contains a point" do
+    linear_ring = SimpleFeatures.LineString.from_coordinates([[10,10],[20,45],[45,10],[10, 10]],256)
+    assert SimpleFeatures.LineString.contains_point?(linear_ring, SimpleFeatures.Point.from_x_y(21,21)) == true
+  end
 
-  test "linear_ring_creation" do
-    #testing just the constructor helpers since the rest is the same as for line_string
-    # linear_ring = SimpleFeatures.LinearRing.from_coordinates([[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],345)
-    # linear_ring.class.should eql(GeoRuby::SimpleFeatures::LinearRing)
-    # linear_ring.length.should eql(4)
-    # linear_ring.should be_closed
-    # linear_ring[1].should == GeoRuby::SimpleFeatures::Point.from_x_y(45.4,41.6,345)
+  test "if not contains a point" do
+    linear_ring = SimpleFeatures.LineString.from_coordinates([[10,10],[20,45],[45,10],[10, 10]],256)
+    assert SimpleFeatures.LineString.contains_point?(linear_ring, SimpleFeatures.Point.from_x_y(21,51)) == false
+  end
+
+  test "if is a linear_ring" do
+    linear_ring = SimpleFeatures.LineString.from_coordinates([[10,10],[20,45],[45,10],[10, 10]],256)
+    assert SimpleFeatures.LineString.linear_ring?(linear_ring) == true
+  end
+
+  test "if is not a linear_ring" do
+    linear_ring = SimpleFeatures.LineString.from_coordinates([[10,10],[20,45],[45,10],[12, 60]],256)
+    assert SimpleFeatures.LineString.linear_ring?(linear_ring) == false
   end
 
   # describe "tu converted" do
