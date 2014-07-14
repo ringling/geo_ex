@@ -77,8 +77,8 @@ defmodule PointTest do
 
   test "returns a point from polar coordinates" do
     point = SimpleFeatures.Point.from_r_t(1.4142,45)
-    assert point.y == 0.9999904099540157
-    assert point.x == 0.9999904099540153
+    assert_in_delta point.y, 0.9999904099540157, 0.001
+    assert_in_delta point.x, 0.9999904099540153, 0.001
   end
 
 
