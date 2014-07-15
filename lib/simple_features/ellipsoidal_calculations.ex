@@ -1,5 +1,5 @@
 defmodule EllipsoidalCalculations do
-  import Geometry
+  import SimpleFeatures.Geometry
 
   @doc """
   Ellipsoidal distance in m using Vincenty's formula. Lifted entirely from Chris Veness's code at http://www.movable-type.co.uk/scripts/LatLongVincenty.html and adapted for Ruby. Assumes the x and y are the lon and lat in degrees.

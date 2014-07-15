@@ -1,5 +1,6 @@
 defmodule SimpleFeatures.Point do
-  import Geometry
+  import SimpleFeatures.Geometry
+  alias SimpleFeatures.Point, as: Point
 
   @moduledoc """
   Represents a point. It is in 3D if the Z coordinate is not nil.
@@ -28,26 +29,26 @@ defmodule SimpleFeatures.Point do
   end
 
   def from_x_y(x, y, srid \\ 0) do
-    %SimpleFeatures.Point{x: x, y: y, lat: x, lng: y, srid: srid}
+    %Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
 
   def from_x_y_z(x, y, z, srid \\ default_srid) do
-    %SimpleFeatures.Point{x: x, y: y, lat: x, lng: y, z: z, srid: srid}
+    %Point{x: x, y: y, lat: x, lng: y, z: z, srid: srid}
   end
 
   def from_x_y_m(x, y, m, srid \\ default_srid) do
-    %SimpleFeatures.Point{x: x, y: y, lat: x, lng: y, m: m, srid: srid}
+    %Point{x: x, y: y, lat: x, lng: y, m: m, srid: srid}
   end
 
   def from_x_y_z_m(x, y, z, m, srid \\ default_srid) do
-    %SimpleFeatures.Point{x: x, y: y, lat: x, lng: y, z: z, m: m, srid: srid}
+    %Point{x: x, y: y, lat: x, lng: y, z: z, m: m, srid: srid}
   end
 
   def from_r_t(r, t, srid \\ default_srid) do
     t = t * deg2rad
     x = r * :math.cos(t)
     y = r * :math.sin(t)
-    %SimpleFeatures.Point{x: x, y: y, lat: x, lng: y, srid: srid}
+    %Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
 
   def from_coordinates(coordinates) do
@@ -79,15 +80,6 @@ defmodule SimpleFeatures.Point do
   @doc "Outputs theta - TODO ugly code"
   def theta_rad(p) do
     _theta_rad(p.x, p.y)
-  end
-
-  defp _theta_rad(0.0, y) do
-    if y < 0, do: 3 * halfpi, else: halfpi
-  end
-
-  defp _theta_rad(x, y) do
-    th = :math.atan(y/x)
-    if r(x, y) > 0, do: th + 2 * :math.pi, else: th
   end
 
   @doc "Outputs theta in degrees"
@@ -138,41 +130,13 @@ defmodule SimpleFeatures.Point do
     end
   end
 
-  defp head_tail(line, tail)  when tail != nil do
-    [line, tail]
-  end
-
-  defp head_tail(line, tail) when tail == nil do
-    [ List.first(line.points), List.last(line.points) ]
-  end
-
-  defp calculate_ort_dist(res, head, tail, c, d, point) do
-    [xx, yy] = calc_xx_yy(res, head, tail, c, d)
-    :math.sqrt(
-      :math.pow((point.x - xx), 2) +
-      :math.pow((point.y - yy), 2)
-    )
-  end
-
-  defp calc_xx_yy(res, _head, tail, _c, _d) when res > 1 do
-    [tail.x, tail.y]
-  end
-
-  defp calc_xx_yy(res, head, _tail, _c, _d) when res < 0 do
-    [head.x, head.y]
-  end
-
-  defp calc_xx_yy(res, head, _tail, c, d) do
-    [head.x + res * c, head.y + res * d]
-  end
-
   @doc "Bearing from a point to another, in degrees."
   def bearing_to(p1, p2) do
     Bearing.bearing_to(p1, p2)
   end
 
   def bearing_text(p1, p2) do
-    bearing = SimpleFeatures.Point.bearing_to(p1,p2)
+    bearing = Point.bearing_to(p1,p2)
     Bearing.bearing_text(bearing)
   end
 
@@ -228,19 +192,57 @@ defmodule SimpleFeatures.Point do
   end
 
   defp from_coord([x, y], srid, _with_m) do
-    %SimpleFeatures.Point{x: x, y: y, lat: x, lng: y, srid: srid}
+    %Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
 
   defp from_coord([x, y, m], srid, true) do
-    %SimpleFeatures.Point{x: x, y: y, lat: x, lng: y, m: m, srid: srid}
+    %Point{x: x, y: y, lat: x, lng: y, m: m, srid: srid}
   end
 
   defp from_coord([x, y, z], srid, false) do
-    %SimpleFeatures.Point{x: x, y: y, lat: x, lng: y, z: z, srid: srid}
+    %Point{x: x, y: y, lat: x, lng: y, z: z, srid: srid}
   end
 
   defp from_coord([x,y,z,m], srid, _with_m) do
-    %SimpleFeatures.Point{x: x, y: y, lat: x, lng: y, z: z, m: m, srid: srid}
+    %Point{x: x, y: y, lat: x, lng: y, z: z, m: m, srid: srid}
+  end
+
+    defp head_tail(line, tail)  when tail != nil do
+    [line, tail]
+  end
+
+  defp head_tail(line, tail) when tail == nil do
+    [ List.first(line.points), List.last(line.points) ]
+  end
+
+  defp calculate_ort_dist(res, head, tail, c, d, point) do
+    [xx, yy] = calc_xx_yy(res, head, tail, c, d)
+    :math.sqrt(
+      :math.pow((point.x - xx), 2) +
+      :math.pow((point.y - yy), 2)
+    )
+  end
+
+  defp calc_xx_yy(res, _head, tail, _c, _d) when res > 1 do
+    [tail.x, tail.y]
+  end
+
+  defp calc_xx_yy(res, head, _tail, _c, _d) when res < 0 do
+    [head.x, head.y]
+  end
+
+  defp calc_xx_yy(res, head, _tail, c, d) do
+    [head.x + res * c, head.y + res * d]
+  end
+
+
+  defp _theta_rad(0.0, y) do
+    if y < 0, do: 3 * halfpi, else: halfpi
+  end
+
+  defp _theta_rad(x, y) do
+    th = :math.atan(y/x)
+    if r(x, y) > 0, do: th + 2 * :math.pi, else: th
   end
 
 end

@@ -1,19 +1,20 @@
 defmodule PolygonTest do
   use ExUnit.Case, async: true
+  alias SimpleFeatures.Polygon, as: Polygon
 
   @poly SimpleFeatures.Polygon.from_coordinates([[[0,0],[4,0],[4,4],[0,4],[0,0]],[[1,1],[3,1],[3,3],[1,3],[1,1]]],256)
 
   test "check if contains point" do
-    assert SimpleFeatures.Polygon.contains_point?(@poly, SimpleFeatures.Point.from_x_y(3, 3)) == true
+    assert Polygon.contains_point?(@poly, SimpleFeatures.Point.from_x_y(3, 3)) == true
   end
 
   test "check if not contains point" do
-    assert SimpleFeatures.Polygon.contains_point?(@poly, SimpleFeatures.Point.from_x_y(5, 5)) == false
+    assert Polygon.contains_point?(@poly, SimpleFeatures.Point.from_x_y(5, 5)) == false
   end
 
   test "bbox" do
-    polygon = SimpleFeatures.Polygon.from_coordinates([[[12.4,-45.3,15.2],[45.4,41.6,2.4],[4.456,1.0698,5.6],[12.4,-45.3,6.1]],[[2.4,5.3,4.5],[5.4,1.4263,4.2],[14.46,1.06,123.1],[2.4,5.3,4.4]]],4326,false)
-    bbox = SimpleFeatures.Polygon.bounding_box(polygon)
+    polygon = Polygon.from_coordinates([[[12.4,-45.3,15.2],[45.4,41.6,2.4],[4.456,1.0698,5.6],[12.4,-45.3,6.1]],[[2.4,5.3,4.5],[5.4,1.4263,4.2],[14.46,1.06,123.1],[2.4,5.3,4.4]]],4326,false)
+    bbox = Polygon.bounding_box(polygon)
     assert length(bbox) == 2
     [first, second] = bbox
     assert first == SimpleFeatures.Point.from_x_y_z(4.456,-45.3,2.4, 4326)
@@ -22,8 +23,8 @@ defmodule PolygonTest do
 
   test "to_coordinates" do
     coordinates = [[[12.4,-45.3,15.2],[45.4,41.6,2.4],[4.456,1.0698,5.6],[12.4,-45.3,6.1]],[[2.4,5.3,4.5],[5.4,1.4263,4.2],[14.46,1.06,123.1],[2.4,5.3,4.4]]]
-    polygon = SimpleFeatures.Polygon.from_coordinates(coordinates,4326,false)
-    assert SimpleFeatures.Polygon.to_coordinates(polygon) == coordinates
+    polygon = Polygon.from_coordinates(coordinates,4326,false)
+    assert Polygon.to_coordinates(polygon) == coordinates
   end
 
   #no test of the binary representation for linear_rings : always with polygons and like line_string

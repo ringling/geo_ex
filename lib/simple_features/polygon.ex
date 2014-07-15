@@ -1,5 +1,8 @@
 defmodule SimpleFeatures.Polygon do
-  import Geometry
+  import SimpleFeatures.Geometry
+  alias SimpleFeatures.LineString, as: LineString
+  alias SimpleFeatures.Point, as: Point
+  alias SimpleFeatures.Polygon, as: Polygon
 
   defstruct rings: [], srid: default_srid, binary_geometry_type: 3, text_geometry_type: "POLYGON"
 
@@ -10,32 +13,37 @@ defmodule SimpleFeatures.Polygon do
   @doc "Creates a polygon. Accept a sequence of line_string coordinates as argument : ((x,y)...(x,y))"
   def from_coordinates(coordinates, srid, with_m) do
     linear_rings =
-      coordinates |> Enum.map fn(coordinate) -> SimpleFeatures.LineString.from_coordinates(coordinate, srid, with_m) end
-    %SimpleFeatures.Polygon{rings: linear_rings, srid: srid}
+      coordinates |> Enum.map fn(coordinate) -> LineString.from_coordinates(coordinate, srid, with_m) end
+    %Polygon{rings: linear_rings, srid: srid}
   end
 
   @doc "Creates a polygon. Accept a sequence of line_string coordinates as argument : ((x,y)...(x,y))"
-  def from_coordinates(coordinates, srid \\ default_srid) do
+  def from_coordinates(coordinate_seq, srid \\ default_srid) do
     linear_rings =
-      coordinates |> Enum.map fn(coordinate) -> SimpleFeatures.LineString.from_coordinates(coordinate, srid) end
-    %SimpleFeatures.Polygon{rings: linear_rings, srid: srid}
+      coordinate_seq |> Enum.map fn(coordinate) -> LineString.from_coordinates(coordinate, srid) end
+    %Polygon{rings: linear_rings, srid: srid}
+  end
+
+  def from_points(points_seq, srid \\  default_srid) do
+    linear_rings = points_seq |> Enum.map fn(points) -> points |> LineString.from_points(srid) end
+    %Polygon{rings: linear_rings, srid: srid}
   end
 
   def to_coordinates(polygon) do
-    polygon.rings |> Enum.map fn(ring) -> SimpleFeatures.LineString.to_coordinates(ring) end
+    polygon.rings |> Enum.map fn(ring) -> LineString.to_coordinates(ring) end
   end
 
   @doc "Does polygon contain point?"
   def contains_point?(polygon, point) do
     polygon.rings
-    |> Enum.filter(fn(lr) -> SimpleFeatures.LineString.contains_point?(lr, point) end)
+    |> Enum.filter(fn(lr) -> LineString.contains_point?(lr, point) end)
     |> Enum.empty?
     |> reverse
   end
 
   @doc "Bounding box in 2D/3D. Returns an array of 2 points"
   def bounding_box(polygon) do
-    result = hd(polygon.rings) |> SimpleFeatures.LineString.bounding_box #valid for x and y
+    result = hd(polygon.rings) |> LineString.bounding_box #valid for x and y
     unless with_z?(polygon) do
       result
     else
@@ -44,19 +52,23 @@ defmodule SimpleFeatures.Polygon do
       |> Enum.reduce({ max.z, min.z },
         fn(index, acc) ->
           Enum.at(polygon.rings, index)
-          |> SimpleFeatures.LineString.bounding_box
+          |> LineString.bounding_box
           |> min_max(acc)
         end)
       |> bbox(result)
     end
   end
 
+  def points(polygon) do
+    polygon.rings |> Enum.map(fn(ring) -> ring.points end) |> List.flatten
+  end
+
   def with_z?(polygon) do
-    polygon.rings |> Enum.any? fn(ring) -> SimpleFeatures.LineString.with_z?(ring) end
+    polygon.rings |> Enum.any? fn(ring) -> LineString.with_z?(ring) end
   end
 
   def with_m?(polygon) do
-    polygon.rings |> Enum.any? fn(ring) -> SimpleFeatures.LineString.with_m?(ring) end
+    polygon.rings |> Enum.any? fn(ring) -> LineString.with_m?(ring) end
   end
 
   defp range(polygon) do
@@ -71,11 +83,17 @@ defmodule SimpleFeatures.Polygon do
   end
 
   defp bbox({ max_z, min_z },[fst, sec] ) do
-    a = SimpleFeatures.Point.from_x_y_z_m(fst.x, fst.y, min_z, fst.m, fst.srid)
-    b = SimpleFeatures.Point.from_x_y_z_m(sec.x, sec.y, max_z, sec.m, sec.srid)
+    a = Point.from_x_y_z_m(fst.x, fst.y, min_z, fst.m, fst.srid)
+    b = Point.from_x_y_z_m(sec.x, sec.y, max_z, sec.m, sec.srid)
     [a,b]
   end
+
+  @doc "Text representation of a polygon"
+  def text_representation(polygon, allow_z \\ true, allow_m \\ true) do
+    polygon.rings |> Enum.map_join ",", fn(linestring) -> LineString.text_representation(linestring, allow_z, allow_m) end
+  end
 end
+
 
 #       def m_range
 #         if with_m
@@ -98,10 +116,6 @@ end
 #         rep
 #       end
 
-#       #Text representation of a polygon
-#       def text_representation(allow_z=true,allow_m=true)
-#         @rings.collect{|line_string| "(" + line_string.text_representation(allow_z,allow_m) + ")" }.join(",")
-#       end
 
 #       #georss simple representation : outputs only the outer ring
 #       def georss_simple_representation(options)
@@ -154,20 +168,6 @@ end
 #         as_json(options).to_json(options)
 #       end
 #       alias :as_geojson :to_json
-
-#       #creates a new polygon. Accepts an array of linear strings as argument
-#       def self.from_linear_rings(linear_rings,srid = DEFAULT_SRID,with_z=false,with_m=false)
-#         polygon = new(srid,with_z,with_m)
-#         polygon.concat(linear_rings)
-#         polygon
-#       end
-
-#       #creates a new polygon from a list of Points (pt1....ptn),(pti....ptj)
-#       def self.from_points(point_sequences, srid=DEFAULT_SRID,with_z=false,with_m=false)
-#         polygon = new(srid,with_z,with_m)
-#         polygon.concat( point_sequences.map {|points| LinearRing.from_points(points,srid,with_z,with_m) } )
-#         polygon
-#       end
 
 #     end
 

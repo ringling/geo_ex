@@ -1,4 +1,4 @@
-defmodule Geometry do
+defmodule SimpleFeatures.Geometry do
 
   def default_srid do
     4326

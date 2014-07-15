@@ -1,7 +1,7 @@
 defmodule GeometryCollectionTest do
   use ExUnit.Case, async: true
 
-  test "test_geometry_collection_creation" do
+  test "geometry_collection creation" do
     point = SimpleFeatures.Point.from_x_y(4.67,45.4,256)
     geometry_collection = SimpleFeatures.GeometryCollection.from_geometries([point])
     assert hd(geometry_collection.geometries) == point

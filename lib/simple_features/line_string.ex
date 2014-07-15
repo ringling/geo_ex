@@ -1,5 +1,7 @@
 defmodule SimpleFeatures.LineString do
-  import Geometry
+  import SimpleFeatures.Geometry
+  alias SimpleFeatures.Point, as: Point
+  alias SimpleFeatures.LineString, as: LineString
 
   @moduledoc """
   Represents a line string as an list of points (see Point).
@@ -11,28 +13,28 @@ defmodule SimpleFeatures.LineString do
 
   @doc "Creates a new line string. Accept a sequence of coordinates as argument : ((x,y)...(x,y))"
   def from_coordinates(coordinates, srid \\ default_srid) do
-    points = Enum.map coordinates, fn(coordinate) -> SimpleFeatures.Point.from_coordinates(coordinate, srid) end
-    %SimpleFeatures.LineString{points: points, srid: srid}
+    points = Enum.map coordinates, fn(coordinate) -> Point.from_coordinates(coordinate, srid) end
+    %LineString{points: points, srid: srid}
   end
 
   @doc "Creates a new line string. Accept a sequence of coordinates as argument : ((x,y)...(x,y))"
   def from_coordinates(coordinates, srid, with_m) do
-    points = Enum.map coordinates, fn(coordinate) -> SimpleFeatures.Point.from_coordinates(coordinate, srid, with_m) end
-    %SimpleFeatures.LineString{points: points, srid: srid}
+    points = Enum.map coordinates, fn(coordinate) -> Point.from_coordinates(coordinate, srid, with_m) end
+    %LineString{points: points, srid: srid}
   end
 
-  #Creates a new line string. Accept an array of points as argument
+  @doc "Creates a new line string. Accept a list of points as argument"
   def from_points(points, srid \\ default_srid) do
-    %SimpleFeatures.LineString{points: points, srid: srid}
+    %LineString{points: points, srid: srid}
   end
 
-  #Text representation of a line string
+  @doc "Text representation of a polygon"
   def text_representation(line, allow_z \\ true, allow_m \\ true) do
-    Enum.map_join(line.points, ",", &(SimpleFeatures.Point.text_representation(&1, allow_z, allow_m)))
+    Enum.map_join(line.points, ",", &(Point.text_representation(&1, allow_z, allow_m)))
   end
 
   def to_coordinates(line_string) do
-    line_string.points |> Enum.map fn(point) -> SimpleFeatures.Point.to_coordinates(point) end
+    line_string.points |> Enum.map fn(point) -> Point.to_coordinates(point) end
   end
 
   @doc """
@@ -82,27 +84,15 @@ defmodule SimpleFeatures.LineString do
   end
 
   def spherical_distance(line) do
-    fun = Module.function(SimpleFeatures.Point, :spherical_distance, 2)
+    fun = Module.function(Point, :spherical_distance, 2)
     {_, total } = Enum.reduce(line.points, { nil, 0 }, fn(point, acc) -> add_point(point, acc, fun) end)
     total
   end
 
   def euclidian_distance(line) do
-    fun = Module.function(SimpleFeatures.Point, :euclidian_distance, 2)
+    fun = Module.function(Point, :euclidian_distance, 2)
     {_, total } = Enum.reduce(line.points, { nil, 0 }, fn(point, acc) -> add_point(point, acc, fun) end)
     total
-  end
-
-  defp add_point(current_point, 0, _) do
-    { current_point, 0 }
-  end
-
-  defp add_point(current_point, { nil, sum }, _) do
-    { current_point, sum }
-  end
-
-  defp add_point(current_point, { previous_point, sum }, fun) do
-    { current_point, fun.(previous_point, current_point) + sum }
   end
 
   @doc """
@@ -115,6 +105,44 @@ defmodule SimpleFeatures.LineString do
 
   def do_simplify(list, epsilon) do
     _do_simplify(list, dmax(list), epsilon)
+  end
+
+  @doc "Outputs the geometry as an EWKT string."
+  def as_ewkt(line, allow_srid \\ true, allow_z \\ true, allow_m \\ true) do
+    srid = srid_text(line, allow_srid)
+    m = m_text(line, allow_m, allow_z)
+    text_rep = text_representation(line, with_z?(line), with_m?(line))
+    "#{srid}#{line.text_geometry_type}#{m}(#{text_rep})"
+  end
+
+  def with_z?(line) do
+    Enum.any?(line.points, fn(point) -> Point.with_z?(point) end)
+  end
+
+  def with_m?(line) do
+    Enum.any?(line.points, fn(point) -> Point.with_m?(point) end)
+  end
+
+  @doc "Bounding box in 2D/3D. Returns an array of 2 points"
+  def bounding_box(line) do
+    { max_x, min_x, max_y, min_y, max_z, min_z } =
+    Enum.reduce(line.points, { nil, nil, nil, nil, nil, nil },
+      fn(point, current) ->
+        min_max(current, { point.x, point.y, point.z })
+      end)
+    [to_point(min_x, min_y, min_z), to_point(max_x, max_y, max_z)]
+  end
+
+  defp add_point(current_point, 0, _) do
+    { current_point, 0 }
+  end
+
+  defp add_point(current_point, { nil, sum }, _) do
+    { current_point, sum }
+  end
+
+  defp add_point(current_point, { previous_point, sum }, fun) do
+    { current_point, fun.(previous_point, current_point) + sum }
   end
 
   defp _do_simplify(list, { index, dmax }, epsilon) when dmax >= epsilon do
@@ -142,19 +170,11 @@ defmodule SimpleFeatures.LineString do
   end
 
   defp orthogonal_distance(i, list) do
-    SimpleFeatures.Point.orthogonal_distance(
+    Point.orthogonal_distance(
       Enum.at(list,i),
       List.first(list),
       List.last(list)
     )
-  end
-
-  @doc "Outputs the geometry as an EWKT string."
-  def as_ewkt(line, allow_srid \\ true, allow_z \\ true, allow_m \\ true) do
-    srid = srid_text(line, allow_srid)
-    m = m_text(line, allow_m, allow_z)
-    text_rep = text_representation(line, with_z?(line), with_m?(line))
-    "#{srid}#{line.text_geometry_type}#{m}(#{text_rep})"
   end
 
   defp srid_text(line, allow_srid) do
@@ -165,30 +185,12 @@ defmodule SimpleFeatures.LineString do
     if with_m?(line) && allow_m && (!with_z?(line) || !allow_z), do: "M", else: ""
   end
 
-  def with_z?(line) do
-    Enum.any?(line.points, fn(point) -> SimpleFeatures.Point.with_z?(point) end)
-  end
-
-  def with_m?(line) do
-    Enum.any?(line.points, fn(point) -> SimpleFeatures.Point.with_m?(point) end)
-  end
-
-  @doc "Bounding box in 2D/3D. Returns an array of 2 points"
-  def bounding_box(line) do
-    { max_x, min_x, max_y, min_y, max_z, min_z } =
-    Enum.reduce(line.points, { nil, nil, nil, nil, nil, nil },
-      fn(point, current) ->
-        min_max(current, { point.x, point.y, point.z })
-      end)
-    [to_point(min_x, min_y, min_z), to_point(max_x, max_y, max_z)]
-  end
-
   defp to_point(x, y, nil) do
-    SimpleFeatures.Point.from_x_y(x, y)
+    Point.from_x_y(x, y)
   end
 
   defp to_point(x, y, z) do
-    SimpleFeatures.Point.from_x_y_z(x, y, z)
+    Point.from_x_y_z(x, y, z)
   end
 
   defp min_max({ max_x, min_x, max_y, min_y, max_z, min_z }, {x, y, z}) do

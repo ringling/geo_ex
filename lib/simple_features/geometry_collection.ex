@@ -1,6 +1,7 @@
 defmodule SimpleFeatures.GeometryCollection do
-  import Geometry
+  import SimpleFeatures.Geometry
   import SimpleFeatures.GeometryHelper
+  alias SimpleFeatures.Point, as: Point
 
   defstruct geometries: [], srid: default_srid, binary_geometry_type: 7, text_geometry_type: "GEOMETRYCOLLECTION"
 
@@ -15,10 +16,10 @@ defmodule SimpleFeatures.GeometryCollection do
     srid = hd(geometry_collection.geometries).srid
     if with_z?(geometry_collection) do
       { max_x, min_x, max_y, min_y, max_z, min_z } = geometry_collection.geometries |> _reduce({ nil, nil, nil, nil, nil, nil })
-      [SimpleFeatures.Point.from_x_y_z(min_x,min_y,min_z, srid),SimpleFeatures.Point.from_x_y_z(max_x,max_y,max_z, srid)]
+      [Point.from_x_y_z(min_x,min_y,min_z, srid),Point.from_x_y_z(max_x,max_y,max_z, srid)]
     else
       { max_x, min_x, max_y, min_y } = geometry_collection.geometries |> _reduce({ nil, nil, nil, nil })
-      [SimpleFeatures.Point.from_x_y(min_x,min_y, srid),SimpleFeatures.Point.from_x_y(max_x,max_y, srid)]
+      [Point.from_x_y(min_x,min_y, srid),Point.from_x_y(max_x,max_y, srid)]
     end
   end
 
