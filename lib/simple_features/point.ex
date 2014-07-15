@@ -149,24 +149,92 @@ defmodule SimpleFeatures.Point do
     end
   end
 
-  def text_representation(point, true, false) do #:nodoc:
+  def text_representation(point, true, false) do
     String.rstrip "#{point.x} #{point.y} #{point.z}"
   end
 
-  def text_representation(point, false, true) do #:nodoc:
+  def text_representation(point, false, true) do
     String.rstrip "#{point.x} #{point.y} #{point.m}"
   end
 
-  def text_representation(point, true, true) do #:nodoc:
+  def text_representation(point, true, true) do
     String.rstrip "#{point.x} #{point.y} #{point.z} #{point.m}"
   end
 
-  def text_representation(point, false, false) do #:nodoc:
+  def text_representation(point, false, false) do
     text_representation(point)
   end
 
-  def text_representation(point) do #:nodoc:
+  def text_representation(point) do
     "#{point.x} #{point.y}"
+  end
+
+  def html_representation(point, options \\ %{coord: true, full: false}) do
+    # options[:coord] = true if options[:coord].nil?
+    out =  "<span class='geo'>"
+    out = out <> "<abbr class='latitude' title='#{point.x}'>#{as_lat(point.x, options)}</abbr>"
+    out = out <> "<abbr class='longitude' title='#{point.y}'>#{as_long(point.y, options)}</abbr>"
+    out = out <> "</span>"
+  end
+
+  @doc """
+  Outputs the geometry coordinate in human format: 47°52′48″N
+  """
+  def as_lat(x, options \\ %{}) do
+    human_representation(%{ x: x }, options) |> Enum.join ""
+  end
+
+  @doc """
+  Outputs the geometry coordinate in human format: -20°06′00W″
+  """
+  def as_long(y, options \\ %{}) do
+    human_representation(%{ y: y }, options) |> Enum.join ""
+  end
+  def as_lng(y, options \\ %{}) do
+    as_long(y, options)
+  end
+
+  @doc """
+  Outputs the geometry in coordinates format: 47°52′48″, -20°06′00″
+  """
+  def as_latlong(options \\ %{}) do
+    # human_representation(options).join(', ')
+  end
+
+  def as_ll(options \\ %{}) do
+  end
+
+  @doc """
+  Human representation of the geom, don't use directly, use:
+  as_lat, #as_long, #as_latlong
+  """
+  def human_representation(struct, options) do
+    struct
+    |> Enum.map(fn({k, v}) ->
+        deg = abs(trunc(v))
+        min = trunc(60 * (abs(v) - deg))
+        labs = abs(v * 1_000_000) / 1_000_000
+        sec = ((((labs - trunc(labs)) * 60) - trunc((labs - trunc(labs)) * 60)) * 100_000) * 60 / 100_000
+        sec = if options.full, do: Float.round(sec, 2), else: round(sec)
+
+        str = "~w°~w′~s″"
+        sec = to_string(sec)
+        if options.coord do
+          out = :io_lib.format(str, [deg,min,sec])
+          out = out ++ cardinal_direction(k, v)
+          :erlang.iolist_to_binary(out)
+        else
+          :erlang.iolist_to_binary(:io_lib.format(str, [trunc(v),min,sec]))
+        end
+      end)
+  end
+
+  defp cardinal_direction(key, value) when key == :x do
+    if value > 0, do:  "N", else: "S"
+  end
+
+  defp cardinal_direction(key, value) when key == :y do
+    if value > 0, do: "E", else: "W"
   end
 
   @doc """
@@ -177,7 +245,7 @@ defmodule SimpleFeatures.Point do
   will not be output (since it won't be used by GE anyway:
   clampToGround is the default)
   """
-  def kml_representation(point, options \\ %{}) do #:nodoc:
+  def kml_representation(point, options \\ %{}) do
     out = "<Point#{id_attr(options)}>\n"
     if options[:geom_data], do: out = out <> options[:geom_data]
     out = out <> "<coordinates>#{point.x},#{point.y}"

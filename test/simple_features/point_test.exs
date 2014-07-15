@@ -205,17 +205,17 @@ defmodule PointTest do
     assert SimpleFeatures.Point.kml_representation(@point) == "<Point>\n<coordinates>-11.2431,32.3141</coordinates>\n</Point>\n"
   end
 
-  # test "should print as html too" do
-  #   point.html_representation.should eql("<span class='geo'><abbr class='latitude' title='-11.2431'>11°14′35″S</abbr><abbr class='longitude' title='32.3141'>32°18′51″E</abbr></span>")
-  # end
+  test "print as html too" do
+    assert SimpleFeatures.Point.html_representation(@point) == "<span class='geo'><abbr class='latitude' title='-11.2431'>11°14′35″S</abbr><abbr class='longitude' title='32.3141'>32°18′51″E</abbr></span>"
+  end
 
-  # test "should print as html too with opts" do
-  #   point.html_representation(coord: false).should eql("<span class='geo'><abbr class='latitude' title='-11.2431'>-11°14′35″</abbr><abbr class='longitude' title='32.3141'>32°18′51″</abbr></span>")
-  # end
+  test "print as html too with opts" do
+    assert SimpleFeatures.Point.html_representation(@point, %{coord: false, full: false}) == "<span class='geo'><abbr class='latitude' title='-11.2431'>-11°14′35″</abbr><abbr class='longitude' title='32.3141'>32°18′51″</abbr></span>"
+  end
 
-  # test "should print as html too with opts" do
-  #   point.html_representation(full: true).should eql("<span class='geo'><abbr class='latitude' title='-11.2431'>11°14′35.16″S</abbr><abbr class='longitude' title='32.3141'>32°18′50.76″E</abbr></span>")
-  # end
+  test "print as html too with opts2" do
+    assert SimpleFeatures.Point.html_representation(@point, %{coord: true, full: true}) == "<span class='geo'><abbr class='latitude' title='-11.2431'>11°14′35.16″S</abbr><abbr class='longitude' title='32.3141'>32°18′50.76″E</abbr></span>"
+  end
 
   # test "should print as georss" do
   #   point.georss_simple_representation(:georss_ns => 'hey').should eql("<hey:point>32.3141 -11.2431</hey:point>\n")
