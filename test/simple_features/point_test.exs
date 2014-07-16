@@ -196,6 +196,78 @@ defmodule PointTest do
     assert SimpleFeatures.Point.bearing_text(@p1,p3) == :w
   end
 
+   # it "should parse lat long" do
+   #    GeoRuby::SimpleFeatures::Point.from_latlong("-20° 47' 26.37","-20° 47' 26.37").x.should be_within(0.00001).of(-20.790658)
+   #    GeoRuby::SimpleFeatures::Point.from_latlong("20° 47' 26.378","20° 47' 26.378").y.should be_within(0.00001).of(20.790658)
+   #  end
+
+   #  it "should parse lat long w/o sec" do
+   #    GeoRuby::SimpleFeatures::Point.from_latlong("-20°47′26″","-20°47′26″").x.should be_within(0.00001).of(-20.790555)
+   #    GeoRuby::SimpleFeatures::Point.from_latlong("20°47′26″","20°47′26″").y.should be_within(0.00001).of(20.790555)
+   #  end
+
+   #  it "should accept with W or S notation" do
+   #    GeoRuby::SimpleFeatures::Point.from_latlong("20° 47' 26.37 W","20° 47' 26.37 S").x.should be_within(0.00001).of(-20.790658)
+   #    GeoRuby::SimpleFeatures::Point.from_latlong("20° 47' 26.37 W","20° 47' 26.37 S").y.should be_within(0.00001).of(-20.790658)
+   #  end
+
+   #  it "should instantiate a point from positive degrees" do
+   #    point = GeoRuby::SimpleFeatures::Point.from_latlong('47`20 06.09E','22`50 77.35N')
+   #    point.y.should be_within(0.000001).of(22.8548194)
+   #    point.x.should be_within(0.000001).of(47.335025)
+   #  end
+
+   #  it "should instantiate a point from negative degrees" do
+   #    point = GeoRuby::SimpleFeatures::Point.from_latlong('47`20 06.09W','22`50 77.35S')
+   #    point.y.should be_within(0.000001).of(-22.8548194)
+   #    point.x.should be_within(0.000001).of(-47.335025)
+   #  end
+
+   #  it "should print out nicely" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(47.88, -20.1).as_latlong.should eql("47°52′48″, -20°06′00″")
+   #  end
+
+   #  it "should print out nicely latlong" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(-20.78, 20.78).as_latlong(:full => true).should eql("-20°46′48.00″, 20°46′48.00″")
+   #  end
+
+   #  it "should print out nicely latlong" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(47.11, -20.2).as_latlong(:full => true).should eql("47°06′36.00″, -20°11′60.00″")
+   #  end
+
+   #  it "should print out nicely latlong" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(47.11, -20.2).as_latlong(:coord => true).should eql("47°06′36″N, 20°11′60″W")
+   #  end
+
+   #  it "should print out nicely latlong" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(-47.11, 20.2).as_latlong(:full => true,:coord => true).should eql("47°06′36.00″S, 20°11′60.00″E")
+   #  end
+
+   #  it "should print out nicely lat" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(-47.11, 20.2).as_lat.should eql("-47°06′36″")
+   #  end
+
+   #  it "should print out nicely lat with opts" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(-47.11, 20.2).as_lat(:full => true).should eql("-47°06′36.00″")
+   #  end
+
+   #  it "should print out nicely lat with opts" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(-47.11, 20.2).as_lat(:full => true,:coord => true).should eql("47°06′36.00″S")
+   #  end
+
+   #  it "should print out nicely long" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(-47.11, 20.2).as_long.should eql("20°11′60″")
+   #  end
+
+   #  it "should print out nicely long with opts" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(-47.11, 20.2).as_long(:full => true).should eql("20°11′60.00″")
+   #  end
+
+   #  it "should print out nicely long with opts" do
+   #    GeoRuby::SimpleFeatures::Point.from_x_y(-47.11, 20.2).as_long(:full => true,:coord => true).should eql("20°11′60.00″E")
+   #  end
+
+
   # > Export Formats
   test "print nicely" do
     assert SimpleFeatures.Point.text_representation(@point) == "-11.2431 32.3141"
@@ -217,9 +289,17 @@ defmodule PointTest do
     assert SimpleFeatures.Point.html_representation(@point, %{coord: true, full: true}) == "<span class='geo'><abbr class='latitude' title='-11.2431'>11°14′35.16″S</abbr><abbr class='longitude' title='32.3141'>32°18′50.76″E</abbr></span>"
   end
 
-  # test "should print as georss" do
-  #   point.georss_simple_representation(:georss_ns => 'hey').should eql("<hey:point>32.3141 -11.2431</hey:point>\n")
-  # end
+  test "print as georss" do
+    assert SimpleFeatures.Point.georss_simple_representation(@point, %{georss_ns: "hey"}) == "<hey:point>32.3141 -11.2431</hey:point>\n"
+  end
+
+  test "print as georss_w3cgeo" do
+    assert SimpleFeatures.Point.georss_w3cgeo_representation(@point, %{w3cgeo_ns: "hey"}) == "<hey:lat>32.3141</hey:lat>\n<hey:long>-11.2431</hey:long>\n"
+  end
+
+  test "print as georss_gml_representation" do
+    assert SimpleFeatures.Point.georss_gml_representation(@point) == "<georss:where>\n<gml:Point>\n<gml:pos>32.3141 -11.2431</gml:pos>\n</gml:Point>\n</georss:where>\n"
+  end
 
   test "print r (polar coords)" do
     assert_in_delta SimpleFeatures.Point.r(@point), 34.214154, 0.0001

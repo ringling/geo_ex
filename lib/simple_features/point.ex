@@ -171,11 +171,27 @@ defmodule SimpleFeatures.Point do
 
   @doc "georss simple representation"
   def georss_simple_representation(point, options \\ %{}) do
-    georss_ns = if options.georss_ns, do: options.georss_ns, else: "georss"
+    georss_ns = if Map.has_key?(options, :georss_ns), do: options.georss_ns, else: "georss"
     geom_attr = if Map.has_key?(options, :geom_attr), do: options.geom_attr
     "<#{georss_ns}:point#{geom_attr}>#{point.y} #{point.x}</#{georss_ns}:point>\n"
   end
 
+  @doc "georss w3c representation"
+  def georss_w3cgeo_representation(point, options \\ %{}) do
+    w3cgeo_ns = if Map.has_key?(options, :w3cgeo_ns), do: options.w3cgeo_ns, else: "geo"
+    "<#{w3cgeo_ns}:lat>#{point.y}</#{w3cgeo_ns}:lat>\n<#{w3cgeo_ns}:long>#{point.x}</#{w3cgeo_ns}:long>\n"
+  end
+
+  @doc "georss gml representation"
+  def georss_gml_representation(point, options \\ %{}) do
+    georss_ns = if Map.has_key?(options, :georss_ns), do: options.georss_ns, else: "georss"
+    gml_ns = if Map.has_key?(options, :gml_ns), do: options.gml_ns, else: "gml"
+    out = "<#{georss_ns}:where>\n<#{gml_ns}:Point>\n<#{gml_ns}:pos>"
+    out = out <> "#{point.y} #{point.x}"
+    out = out <> "</#{gml_ns}:pos>\n</#{gml_ns}:Point>\n</#{georss_ns}:where>\n"
+  end
+
+  @doc "html representation"
   def html_representation(point, options \\ %{coord: true, full: false}) do
     # options[:coord] = true if options[:coord].nil?
     out =  "<span class='geo'>"
