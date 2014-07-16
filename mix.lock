@@ -1,1 +1,2 @@
-%{"apex": {:package, "0.3.0"}}
+%{"apex": {:package, "0.3.0"},
+  "exprintf": {:git, "git://github.com/parroty/exprintf.git", "2bcc18432f62cad584f8a49030bef9d30d2ab4fd", []}}
