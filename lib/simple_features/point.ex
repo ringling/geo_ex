@@ -141,7 +141,7 @@ defmodule SimpleFeatures.Point do
     Bearing.bearing_text(bearing)
   end
 
-  @doc "TODO Perhaps should support with_m analogous to from_coordinates?"
+  @doc "TODO Should support 'with_m' analogous to from_coordinates"
   def to_coordinates(point) do
     if with_z?(point) do
       [point.x, point.y, point.z]
@@ -189,7 +189,7 @@ defmodule SimpleFeatures.Point do
     gml_ns = if Map.has_key?(options, :gml_ns), do: options.gml_ns, else: "gml"
     out = "<#{georss_ns}:where>\n<#{gml_ns}:Point>\n<#{gml_ns}:pos>"
     out = out <> "#{point.y} #{point.x}"
-    out = out <> "</#{gml_ns}:pos>\n</#{gml_ns}:Point>\n</#{georss_ns}:where>\n"
+    out <> "</#{gml_ns}:pos>\n</#{gml_ns}:Point>\n</#{georss_ns}:where>\n"
   end
 
   @doc "html representation"
@@ -198,7 +198,39 @@ defmodule SimpleFeatures.Point do
     out =  "<span class='geo'>"
     out = out <> "<abbr class='latitude' title='#{point.x}'>#{as_lat(point, options)}</abbr>"
     out = out <> "<abbr class='longitude' title='#{point.y}'>#{as_long(point, options)}</abbr>"
-    out = out <> "</span>"
+    out <> "</span>"
+  end
+
+  @doc "Creates a point using coordinates like 22`34 23.45N"
+  def from_latlong(lat, lon, srid \\ default_srid) do
+    [x,y] = [lat, lon] |> Enum.map  fn(l) ->
+       [ _, sig, deg, min, sec, cen, _] = l |> scan |> parse_ll
+      if Regex.match?(~r/W|S/, l), do: sig = true
+      {sec_cen, _} = Float.parse("0#{sec}#{cen}")
+      {deg,_} = Integer.parse("#{deg}")
+      {min,_} = Integer.parse(min)
+      deg = trunc deg
+      min = trunc min
+      dec = deg + (min * 60 + sec_cen) / 3600
+      if sig, do: (dec * -1), else: dec
+    end
+    Point.from_x_y(x, y, srid)
+  end
+
+  defp scan(l) do
+    List.flatten Regex.scan(~r/(-)?(\d{1,2})\D*(\d{2})\D*(\d{2})(\D*(\d{1,3}))?/, l)
+  end
+
+  defp parse_ll([ _, sig, deg, min, sec, cen, _]) do
+    [ nil, parse_sig(sig), deg, min, sec, cen, nil]
+  end
+
+  defp parse_ll([ _, sig, deg, min, sec]) do
+    [ nil, parse_sig(sig), deg, min, sec, "", nil]
+  end
+
+  defp parse_sig(sig) do
+    if String.length(sig) == 0, do: false, else: true
   end
 
   @doc """

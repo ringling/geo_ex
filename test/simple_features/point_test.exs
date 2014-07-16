@@ -194,32 +194,31 @@ defmodule PointTest do
     assert Point.bearing_text(@p1,p3) == :w
   end
 
-   # it "should parse lat long" do
-   #    GeoRuby::SimpleFeatures::Point.from_latlong("-20° 47' 26.37","-20° 47' 26.37").x.should be_within(0.00001).of(-20.790658)
-   #    GeoRuby::SimpleFeatures::Point.from_latlong("20° 47' 26.378","20° 47' 26.378").y.should be_within(0.00001).of(20.790658)
-   #  end
+   test "parses lat long" do
+    assert_in_delta Point.from_latlong("-20° 47' 26.37","-20° 47' 26.37").x, -20.790658, 0.00001
+    assert_in_delta Point.from_latlong("-20° 47' 26.37","-20° 47' 26.37").y, -20.790658, 0.00001
+  end
 
-   #  it "should parse lat long w/o sec" do
-   #    GeoRuby::SimpleFeatures::Point.from_latlong("-20°47′26″","-20°47′26″").x.should be_within(0.00001).of(-20.790555)
-   #    GeoRuby::SimpleFeatures::Point.from_latlong("20°47′26″","20°47′26″").y.should be_within(0.00001).of(20.790555)
-   #  end
+  test "parse lat long w/o sec" do
+    assert_in_delta Point.from_latlong("20°47′26″","20°47′26″").x, 20.790555, 0.00001
+  end
 
-   #  it "should accept with W or S notation" do
-   #    GeoRuby::SimpleFeatures::Point.from_latlong("20° 47' 26.37 W","20° 47' 26.37 S").x.should be_within(0.00001).of(-20.790658)
-   #    GeoRuby::SimpleFeatures::Point.from_latlong("20° 47' 26.37 W","20° 47' 26.37 S").y.should be_within(0.00001).of(-20.790658)
-   #  end
+  test "accepts with W or S notation" do
+    assert_in_delta Point.from_latlong("20° 47' 26.37 W","20° 47' 26.37 S").x, -20.790658, 0.00001
+    assert_in_delta Point.from_latlong("20° 47' 26.37 W","20° 47' 26.37 S").y, -20.790658, 0.00001
+  end
 
-   #  it "should instantiate a point from positive degrees" do
-   #    point = GeoRuby::SimpleFeatures::Point.from_latlong('47`20 06.09E','22`50 77.35N')
-   #    point.y.should be_within(0.000001).of(22.8548194)
-   #    point.x.should be_within(0.000001).of(47.335025)
-   #  end
+  test "should instantiate a point from positive degrees" do
+    point = Point.from_latlong("47`20 06.09E","22`50 77.35N")
+    assert_in_delta point.y, 22.8548194, 0.000001
+    assert_in_delta point.x, 47.335025, 0.000001
+  end
 
-   #  it "should instantiate a point from negative degrees" do
-   #    point = GeoRuby::SimpleFeatures::Point.from_latlong('47`20 06.09W','22`50 77.35S')
-   #    point.y.should be_within(0.000001).of(-22.8548194)
-   #    point.x.should be_within(0.000001).of(-47.335025)
-   #  end
+  test "should instantiate a point from negative degrees" do
+    point = Point.from_latlong("47`20 06.09W","22`50 77.35S")
+    assert_in_delta point.y, -22.8548194, 0.000001
+    assert_in_delta point.x, -47.335025, 0.000001
+  end
 
   test "print latlong out nicely" do
     point = Point.from_x_y(47.88, -20.1)
