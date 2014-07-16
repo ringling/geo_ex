@@ -1,5 +1,6 @@
 defmodule SimpleFeatures.Point do
   import SimpleFeatures.Geometry
+  import ExPrintf
   alias SimpleFeatures.Point, as: Point
 
   @moduledoc """
@@ -195,23 +196,23 @@ defmodule SimpleFeatures.Point do
   def html_representation(point, options \\ %{coord: true, full: false}) do
     # options[:coord] = true if options[:coord].nil?
     out =  "<span class='geo'>"
-    out = out <> "<abbr class='latitude' title='#{point.x}'>#{as_lat(point.x, options)}</abbr>"
-    out = out <> "<abbr class='longitude' title='#{point.y}'>#{as_long(point.y, options)}</abbr>"
+    out = out <> "<abbr class='latitude' title='#{point.x}'>#{as_lat(point, options)}</abbr>"
+    out = out <> "<abbr class='longitude' title='#{point.y}'>#{as_long(point, options)}</abbr>"
     out = out <> "</span>"
   end
 
   @doc """
   Outputs the geometry coordinate in human format: 47°52′48″N
   """
-  def as_lat(x, options \\ %{}) do
-    human_representation(%{ x: x }, options) |> Enum.join ""
+  def as_lat(point, options \\ %{}) do
+    human_representation(%{ x: point.x }, options) |> Enum.join ""
   end
 
   @doc """
   Outputs the geometry coordinate in human format: -20°06′00W″
   """
-  def as_long(y, options \\ %{}) do
-    human_representation(%{ y: y }, options) |> Enum.join ""
+  def as_long(point, options \\ %{}) do
+    human_representation(%{ y: point.y }, options) |> Enum.join ""
   end
   def as_lng(y, options \\ %{}) do
     as_long(y, options)
@@ -220,11 +221,12 @@ defmodule SimpleFeatures.Point do
   @doc """
   Outputs the geometry in coordinates format: 47°52′48″, -20°06′00″
   """
-  def as_latlong(options \\ %{}) do
-    # human_representation(options).join(', ')
+  def as_latlong(point, options \\ %{}) do
+    human_representation(%{ x: point.x, y: point.y }, options) |> Enum.join ", "
   end
 
-  def as_ll(options \\ %{}) do
+  def as_ll(point, options \\ %{}) do
+    as_latlong(point, options)
   end
 
   @doc """
@@ -238,12 +240,12 @@ defmodule SimpleFeatures.Point do
         min = trunc(60 * (abs(v) - deg))
         labs = abs(v * 1_000_000) / 1_000_000
         sec = ((((labs - trunc(labs)) * 60) - trunc((labs - trunc(labs)) * 60)) * 100_000) * 60 / 100_000
-        sec = if options.full, do: Float.round(sec, 2), else: round(sec)
-
-        str = "~w°~w′~s″"
+        sec = if Map.has_key?(options, :full) && options.full, do: sprintf("%.2f", [sec]), else: sprintf("%02i", [round(sec)])
+        min = sprintf("%02i", [min])
+        str = "~w°~s′~s″"
         sec = to_string(sec)
-        if options.coord do
-          out = :io_lib.format(str, [deg,min,sec])
+        if Map.has_key?(options, :coord) && options.coord do
+          out = :io_lib.format(str, [deg,min,sec]) # TODO refactor to use exprintf
           out = out ++ cardinal_direction(k, v)
           :erlang.iolist_to_binary(out)
         else
