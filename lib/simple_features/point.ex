@@ -169,6 +169,13 @@ defmodule SimpleFeatures.Point do
     "#{point.x} #{point.y}"
   end
 
+  @doc "georss simple representation"
+  def georss_simple_representation(point, options \\ %{}) do
+    georss_ns = if options.georss_ns, do: options.georss_ns, else: "georss"
+    geom_attr = if Map.has_key?(options, :geom_attr), do: options.geom_attr
+    "<#{georss_ns}:point#{geom_attr}>#{point.y} #{point.x}</#{georss_ns}:point>\n"
+  end
+
   def html_representation(point, options \\ %{coord: true, full: false}) do
     # options[:coord] = true if options[:coord].nil?
     out =  "<span class='geo'>"
