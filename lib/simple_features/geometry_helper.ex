@@ -27,4 +27,32 @@ defmodule SimpleFeatures.GeometryHelper do
     fun.(geometry)
   end
 
+  def with_m?(geometry) do
+    fun = Module.function(geometry.__struct__, :with_m?, 1)
+    fun.(geometry)
+  end
+
+  def text_representation(geometry) do
+    fun = Module.function(geometry.__struct__, :text_representation, 3)
+    fun.(geometry, with_z?(geometry), with_m?(geometry))
+  end
+
+  @doc """
+  Outputs the geometry as an EWKT string.
+  """
+  def as_ewkt(geometry, allow_srid \\ true, allow_z \\ true, allow_m \\ true) do
+    if allow_srid do
+      ewkt = "SRID=#{geometry.srid};"
+    else
+      ewkt = ""
+    end
+    ewkt = ewkt <> geometry.text_geometry_type
+    ewkt = ewkt <> m_text(geometry, allow_m, allow_z)
+    ewkt <> "(" <> text_representation(geometry) <> ")"
+  end
+
+  defp m_text(geometry, allow_m, allow_z) do
+    if with_m?(geometry) && allow_m && (!with_z?(geometry) || !allow_z), do: "M", else: ""
+  end
+
 end
