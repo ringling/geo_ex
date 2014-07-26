@@ -25,7 +25,7 @@ defmodule SimpleFeatures.Polygon do
   end
 
   def from_points(points_seq, srid \\  default_srid) do
-    linear_rings = points_seq |> Enum.map fn(points) -> points |> LineString.from_points(srid) end
+    linear_rings = points_seq |> Enum.map fn(points) -> LineString.from_points(points, srid) end
     %Polygon{rings: linear_rings, srid: srid}
   end
 
@@ -60,7 +60,9 @@ defmodule SimpleFeatures.Polygon do
   end
 
   def points(polygon) do
-    polygon.rings |> Enum.map(fn(ring) -> ring.points end) |> List.flatten
+    polygon.rings
+    |> Enum.map(fn(ring) -> ring.points end)
+    |> List.flatten
   end
 
   def with_z?(polygon) do
