@@ -1,8 +1,8 @@
 defmodule SimpleFeatures.Polygon do
   import SimpleFeatures.Geometry
-  alias SimpleFeatures.LineString, as: LineString
-  alias SimpleFeatures.Point, as: Point
-  alias SimpleFeatures.Polygon, as: Polygon
+  alias SimpleFeatures.LineString
+  alias SimpleFeatures.Point
+  alias SimpleFeatures.Polygon
 
   defstruct rings: [], srid: default_srid, binary_geometry_type: 3, text_geometry_type: "POLYGON"
 

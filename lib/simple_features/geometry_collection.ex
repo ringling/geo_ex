@@ -1,7 +1,7 @@
 defmodule SimpleFeatures.GeometryCollection do
   import SimpleFeatures.Geometry
   import SimpleFeatures.GeometryHelper
-  alias SimpleFeatures.Point, as: Point
+  alias SimpleFeatures.Point
 
   defstruct geometries: [], srid: default_srid, binary_geometry_type: 7, text_geometry_type: "GEOMETRYCOLLECTION"
 

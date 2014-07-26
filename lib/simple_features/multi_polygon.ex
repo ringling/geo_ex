@@ -1,6 +1,6 @@
 defmodule SimpleFeatures.MultiPolygon do
   import SimpleFeatures.Geometry
-  alias SimpleFeatures.GeometryHelper, as: GeometryHelper
+  alias SimpleFeatures.GeometryHelper
 
   defstruct geometries: [], srid: default_srid, binary_geometry_type: 6, text_geometry_type: "MULTIPOLYGON"
 

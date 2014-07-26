@@ -1,5 +1,6 @@
 defmodule EllipsoidalCalculations do
   import SimpleFeatures.Geometry
+  alias :math, as: Math
 
   @doc """
   Ellipsoidal distance in m using Vincenty's formula. Lifted entirely from Chris Veness's code at http://www.movable-type.co.uk/scripts/LatLongVincenty.html and adapted for Ruby. Assumes the x and y are the lon and lat in degrees.
@@ -12,24 +13,24 @@ defmodule EllipsoidalCalculations do
     f = (a - b) / a
     l = (p2.lng - p1.lng) * deg2rad
 
-    u1 = :math.atan((1-f) * :math.tan(p1.lat * deg2rad))
-    u2 = :math.atan((1-f) * :math.tan(p2.lat * deg2rad))
+    u1 = Math.atan((1-f) * Math.tan(p1.lat * deg2rad))
+    u2 = Math.atan((1-f) * Math.tan(p2.lat * deg2rad))
 
-    sinU1 = :math.sin(u1)
-    cosU1 = :math.cos(u1)
-    sinU2 = :math.sin(u2)
-    cosU2 = :math.cos(u2)
+    sinU1 = Math.sin(u1)
+    cosU1 = Math.cos(u1)
+    sinU2 = Math.sin(u2)
+    cosU2 = Math.cos(u2)
 
     lambda = l
-    lambdaP = 2 * :math.pi
+    lambdaP = 2 * Math.pi
     iterLimit = 20
 
     calc(a, b, f, l, lambda, lambdaP, cosU1, cosU2, sinU1, sinU2, 0, 0, 0, 0, 0, iterLimit)
   end
 
   defp calc(a, b, f, l, lambda, lambdaP, cosU1, cosU2, sinU1, sinU2, sigma, _sinSigma, cosSqAlpha, cosSigma, cos2SigmaM, iterLimit) when abs(lambda - lambdaP) > 1.0e-12 and iterLimit > 0 do
-    sinLambda =:math.sin(lambda)
-    cosLambda =:math.cos(lambda)
+    sinLambda = Math.sin(lambda)
+    cosLambda = Math.cos(lambda)
     sinSigma  = sin_sigma(cosU1, cosU2, sinU1, sinU2, cosLambda, sinLambda)
 
     # coincident points
@@ -38,7 +39,7 @@ defmodule EllipsoidalCalculations do
     else
       cosSigma   = cos_sigma(cosU1, cosU2, sinU1, sinU2, cosLambda)
 
-      sigma      =:math.atan2(sinSigma, cosSigma)
+      sigma      = Math.atan2(sinSigma, cosSigma)
       sinAlpha   = cosU1 * cosU2 * sinLambda / sinSigma
       cosSqAlpha = 1 - sinAlpha * sinAlpha
       cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha
@@ -82,7 +83,7 @@ defmodule EllipsoidalCalculations do
   end
 
   defp sin_sigma(cosU1, cosU2, sinU1, sinU2, cosLambda, sinLambda) do
-    :math.sqrt((cosU2 * sinLambda) * (cosU2 * sinLambda) +
+    Math.sqrt((cosU2 * sinLambda) * (cosU2 * sinLambda) +
               (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) *
               (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda))
   end

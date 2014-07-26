@@ -1,4 +1,5 @@
 defmodule Bearing do
+  alias :math, as: Math
 
   def bearing_to(p1, p2) do
     if p1 == p2, do: 0, else: bearing(p2.x - p1.x, p2.y - p1.y)
@@ -22,7 +23,7 @@ defmodule Bearing do
   end
 
   defp degrees(a,b) do
-    :math.acos(b / :math.sqrt(a*a+b*b)) / :math.pi * 180
+    Math.acos(b / Math.sqrt(a*a+b*b)) / Math.pi * 180
   end
 
 end

@@ -1,7 +1,8 @@
 defmodule SimpleFeatures.Point do
   import SimpleFeatures.Geometry
   import ExPrintf
-  alias SimpleFeatures.Point, as: Point
+  alias SimpleFeatures.Point
+  alias :math, as: Math
 
   @moduledoc """
   Represents a point. It is in 3D if the Z coordinate is not nil.
@@ -47,8 +48,8 @@ defmodule SimpleFeatures.Point do
 
   def from_r_t(r, t, srid \\ default_srid) do
     t = t * deg2rad
-    x = r * :math.cos(t)
-    y = r * :math.sin(t)
+    x = r * Math.cos(t)
+    y = r * Math.sin(t)
     %Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
 
@@ -65,16 +66,16 @@ defmodule SimpleFeatures.Point do
   end
 
   def euclidian_distance(p1, p2) do
-    :math.sqrt(:math.pow(p2.x - p1.x, 2) + :math.pow(p2.y - p1.y, 2))
+    Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2))
   end
 
   def spherical_distance(p1, p2, r \\ 6370997.0) do
     dlat = (p2.lat - p1.lat) * deg2rad / 2
     dlon = (p2.lng - p1.lng) * deg2rad / 2
 
-    a = :math.pow(:math.sin(dlat),2) + :math.cos(p1.lat * deg2rad) *
-      :math.cos(p2.lat * deg2rad) * :math.pow(:math.sin(dlon),2)
-    c = 2 * :math.atan2(:math.sqrt(a), :math.sqrt(1-a))
+    a = Math.pow(Math.sin(dlat),2) + Math.cos(p1.lat * deg2rad) *
+      Math.cos(p2.lat * deg2rad) * Math.pow(Math.sin(dlon),2)
+    c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
     r * c
   end
 
@@ -104,7 +105,7 @@ defmodule SimpleFeatures.Point do
   end
 
   def r(x,y) do
-    :math.sqrt(:math.pow(x,2) + :math.pow(y,2))
+    Math.sqrt(Math.pow(x,2) + Math.pow(y,2))
   end
 
   def ellipsoidal_distance(p1, p2, a \\ 6378137.0, b \\ 6356752.3142) do
@@ -342,9 +343,9 @@ defmodule SimpleFeatures.Point do
 
   defp calculate_ort_dist(res, head, tail, c, d, point) do
     [xx, yy] = calc_xx_yy(res, head, tail, c, d)
-    :math.sqrt(
-      :math.pow((point.x - xx), 2) +
-      :math.pow((point.y - yy), 2)
+    Math.sqrt(
+      Math.pow((point.x - xx), 2) +
+      Math.pow((point.y - yy), 2)
     )
   end
 
@@ -366,8 +367,8 @@ defmodule SimpleFeatures.Point do
   end
 
   defp _theta_rad(x, y) do
-    th = :math.atan(y/x)
-    if r(x, y) > 0, do: th + 2 * :math.pi, else: th
+    th = Math.atan(y/x)
+    if r(x, y) > 0, do: th + 2 * Math.pi, else: th
   end
 
 end
