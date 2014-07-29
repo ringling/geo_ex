@@ -7,15 +7,27 @@ defmodule SimpleFeatures.GeometryHelper do
     end
   end
 
-  def bounding_box_for_geometry(geometry) do
-    fun = Module.function(geometry.__struct__, :bounding_box, 1)
-    fun.(geometry)
+  def within_bounding_box?(point, bounding_box) do
+    [a,b] = bounding_box
+    _contains?([point.x,point.y], [a,b])
+  end
+
+  def contains?(bounding_box = [sw, ne], point) do
+    point.x >= sw.x &&
+    point.y >= sw.y &&
+    point.x <= ne.x &&
+    point.y <= ne.y
   end
 
   def contains_point?(geometry, point) do
     fun = Module.function(geometry.__struct__, :contains_point?, 2)
     fun.(geometry, point)
   end
+
+  defp _contains?([x,y], [a,b]) do
+    (b.y > y != a.y > y) && (x < (a.x - b.x) * (y - b.y) / (a.y - b.y) + b.x)
+  end
+
 
   def to_coordinates(geometry) do
     fun = Module.function(geometry.__struct__, :to_coordinates, 1)

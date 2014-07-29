@@ -41,7 +41,7 @@ defmodule SimpleFeatures.Polygon do
     |> reverse
   end
 
-  @doc "Bounding box in 2D/3D. Returns an array of 2 points"
+  @doc "Bounding box in 2D/3D. Returns a list of 2 points"
   def bounding_box(polygon) do
     result = hd(polygon.rings) |> LineString.bounding_box #valid for x and y
     unless with_z?(polygon) do

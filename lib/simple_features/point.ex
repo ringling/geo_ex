@@ -30,7 +30,7 @@ defmodule SimpleFeatures.Point do
     point.m != nil
   end
 
-  def from_x_y(x, y, srid \\ 0) do
+  def from_x_y(x, y, srid \\ default_srid) do
     %Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
 
@@ -318,22 +318,31 @@ defmodule SimpleFeatures.Point do
   end
 
   defp from_coord([x, y], srid, _with_m) do
+    if is_binary(x), do: [x, y] = [to_float(x),to_float(y)]
     %Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
 
   defp from_coord([x, y, m], srid, true) do
+    if is_binary(x), do: [x, y, m] = [to_float(x),to_float(y),to_float(m)]
     %Point{x: x, y: y, lat: x, lng: y, m: m, srid: srid}
   end
 
   defp from_coord([x, y, z], srid, false) do
+    if is_binary(x), do: [x, y, z] = [to_float(x),to_float(y),to_float(z)]
     %Point{x: x, y: y, lat: x, lng: y, z: z, srid: srid}
   end
 
   defp from_coord([x,y,z,m], srid, _with_m) do
+    if is_binary(x), do: [x, y, z, m] = [to_float(x),to_float(y),to_float(z),to_float(m)]
     %Point{x: x, y: y, lat: x, lng: y, z: z, m: m, srid: srid}
   end
 
-    defp head_tail(line, tail)  when tail != nil do
+  defp to_float(str) do
+    {float, _} = Float.parse(str)
+    float
+  end
+
+  defp head_tail(line, tail)  when tail != nil do
     [line, tail]
   end
 

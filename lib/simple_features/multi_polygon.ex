@@ -39,6 +39,19 @@ defmodule SimpleFeatures.MultiPolygon do
     end
   end
 
+  @doc "Does multi_polygon contain point?"
+  def contains_point?(multi_polygon, bounding_box, point) do
+    multi_polygon.geometries
+    |> Enum.any? fn(geometry) ->
+      GeometryHelper.contains_point?(geometry, point)
+    end
+  end
+
+  @doc "Bounding box in 2D/3D. Returns an array of 2 points"
+  def bounding_box(multi_polygon) do
+    SimpleFeatures.GeometryCollection.bounding_box(multi_polygon)
+  end
+
 end
 
 # @doc "Text representation of a MultiPolygon"

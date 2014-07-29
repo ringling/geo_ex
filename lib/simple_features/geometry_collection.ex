@@ -23,6 +23,11 @@ defmodule SimpleFeatures.GeometryCollection do
     end
   end
 
+  def bounding_box_for_geometry(geometry) do
+    fun = Module.function(geometry.__struct__, :bounding_box, 1)
+    fun.(geometry)
+  end
+
   defp _reduce(geometries, init_values) do
     geometries |> Enum.reduce init_values, fn(geometry, acc) -> find_min_max(geometry, acc) end
   end
