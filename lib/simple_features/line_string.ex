@@ -1,7 +1,7 @@
 defmodule SimpleFeatures.LineString do
   import SimpleFeatures.Geometry
   alias SimpleFeatures.Point
-  alias SimpleFeatures.LineString
+  alias __MODULE__
 
   @moduledoc """
   Represents a line string as an list of points (see Point).

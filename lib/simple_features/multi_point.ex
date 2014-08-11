@@ -1,7 +1,7 @@
 defmodule SimpleFeatures.MultiPoint do
   import SimpleFeatures.Geometry
   alias SimpleFeatures.Point, as: Point
-  alias SimpleFeatures.MultiPoint, as: MultiPoint
+  alias __MODULE__
   alias SimpleFeatures.GeometryHelper, as: GeometryHelper
 
   defdelegate as_ewkt(multi_point, allow_srid, allow_z, allow_m), to: GeometryHelper

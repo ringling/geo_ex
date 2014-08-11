@@ -1,7 +1,7 @@
 defmodule SimpleFeatures.Point do
   import SimpleFeatures.Geometry
   import ExPrintf
-  alias SimpleFeatures.Point
+  alias __MODULE__
   alias :math, as: Math
 
   @moduledoc """
