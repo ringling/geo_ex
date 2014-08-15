@@ -1,6 +1,8 @@
 defmodule MultiPolygonTest do
   use ExUnit.Case, async: true
 
+  alias SimpleFeatures.MultiPolygon
+
   @coordinates [12.4,-45.3]
   @polygon_coordinates1 [[[0,0],[4,0],[4,4],[0,4],[0,0]],[[1,1],[3,1],[3,3],[1,3],[1,1]]]
   @polygon_coordinates2 [[[0,0],[4,0],[4,4],[0,4],[0,0]],[[1,1],[3,1],[3,3],[1,3],[1,1]]]
@@ -8,17 +10,17 @@ defmodule MultiPolygonTest do
   @point SimpleFeatures.Point.from_coordinates(@coordinates,256)
   @poly1 SimpleFeatures.Polygon.from_coordinates([[@coordinates,[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]],256)
   @poly2 SimpleFeatures.Polygon.from_coordinates(@polygon_coordinates1, 256)
-  @mp SimpleFeatures.MultiPolygon.from_polygons([@poly1, @poly2],256)
+  @mp MultiPolygon.from_polygons([@poly1, @poly2],256)
 
   test "multi_polygon from polygons creation" do
-    multi_polygon1 = SimpleFeatures.MultiPolygon.from_polygons([@poly1, @poly2],256)
+    multi_polygon1 = MultiPolygon.from_polygons([@poly1, @poly2],256)
     assert length(multi_polygon1.geometries) == 2
     assert hd(multi_polygon1.geometries) == @poly1
     assert hd(multi_polygon1.geometries) == SimpleFeatures.Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]],256)
   end
 
   test "multi_polygon from coordinates creation" do
-    multi_polygon1 = SimpleFeatures.MultiPolygon.from_coordinates(@polygon_coordinates_sequence, 256, false)
+    multi_polygon1 = MultiPolygon.from_coordinates(@polygon_coordinates_sequence, 256, false)
     assert length(multi_polygon1.geometries) == 2
     assert hd(multi_polygon1.geometries) == SimpleFeatures.Polygon.from_coordinates(@polygon_coordinates1, 256)
   end
@@ -28,37 +30,46 @@ defmodule MultiPolygonTest do
     polygon_points2 = @polygon_coordinates2 |> coordinate_seq_to_point_seq(256)
     polygon_point_sequence_sequences = [polygon_points1, polygon_points2]
 
-    multi_polygon = SimpleFeatures.MultiPolygon.from_points(polygon_point_sequence_sequences, 256)
+    multi_polygon = MultiPolygon.from_points(polygon_point_sequence_sequences, 256)
     assert length(multi_polygon.geometries) == 2
     assert hd(multi_polygon.geometries) == SimpleFeatures.Polygon.from_coordinates(@polygon_coordinates1, 256)
   end
 
   test "returns points" do
-    points = SimpleFeatures.MultiPolygon.points(@mp)
+    points = MultiPolygon.points(@mp)
     assert hd(points) == @point
   end
 
   test "flatten points right" do
-    points = SimpleFeatures.MultiPolygon.points(@mp)
+    points = MultiPolygon.points(@mp)
     assert length(points) == 18
   end
 
   test "contains point" do
     poly1 = SimpleFeatures.Polygon.from_coordinates([[[0,0],[0,2],[2,2],[2,0],[0,0]]],256)
     poly2 = SimpleFeatures.Polygon.from_coordinates([[[0,4],[4,4],[4,8],[0,8],[0,4]]], 256)
-    multi_poly = SimpleFeatures.MultiPolygon.from_polygons([poly1, poly2],256)
+    multi_poly = MultiPolygon.from_polygons([poly1, poly2],256)
     inside = SimpleFeatures.Point.from_coordinates([0,0],256)
-    assert SimpleFeatures.MultiPolygon.contains_point?(multi_poly, inside) == true
+    assert MultiPolygon.contains_point?(multi_poly, inside) == true
   end
 
   test "doesn't contains point" do
     poly1 = SimpleFeatures.Polygon.from_coordinates([[[0,0],[0,2],[2,2],[2,0],[0,0]]],256)
     poly2 = SimpleFeatures.Polygon.from_coordinates([[[0,4],[4,4],[4,8],[0,8],[0,4]]], 256)
-    multi_poly = SimpleFeatures.MultiPolygon.from_polygons([poly1, poly2],256)
+    multi_poly = MultiPolygon.from_polygons([poly1, poly2],256)
     on_border = SimpleFeatures.Point.from_coordinates([4.0,4.0],256)
     outside = SimpleFeatures.Point.from_coordinates([4.1,4.1],256)
-    assert SimpleFeatures.MultiPolygon.contains_point?(multi_poly, on_border) == false
-    assert SimpleFeatures.MultiPolygon.contains_point?(multi_poly, outside) == false
+    assert MultiPolygon.contains_point?(multi_poly, on_border) == false
+    assert MultiPolygon.contains_point?(multi_poly, outside) == false
+  end
+
+  test "to coordinates" do
+    points1 = [[[0,0],[0,2],[2,2],[2,0],[0,0]]]
+    points2 = [[[0,4],[4,4],[4,8],[0,8],[0,4]]]
+    poly1 = SimpleFeatures.Polygon.from_coordinates(points1,256)
+    poly2 = SimpleFeatures.Polygon.from_coordinates(points2, 256)
+    multi_poly = MultiPolygon.from_polygons([poly1, poly2],256)
+    MultiPolygon.to_coordinates(multi_poly) == [points1, points2]
   end
 
   defp coordinate_seq_to_point_seq(coordinates_sequence, srid) do

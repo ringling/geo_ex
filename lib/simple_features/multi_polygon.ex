@@ -39,6 +39,17 @@ defmodule SimpleFeatures.MultiPolygon do
     end
   end
 
+  def to_coordinates(multi_polygon) do
+    multi_polygon.geometries |> Enum.map fn(polygon) -> SimpleFeatures.Polygon.to_coordinates(polygon) end
+  end
+
+  def as_json(multi_polygon) do
+    [
+      type: "MultiPolygon",
+      coordinates: to_coordinates(multi_polygon)
+    ]
+  end
+
 end
 
 # @doc "Text representation of a MultiPolygon"
@@ -46,14 +57,6 @@ end
 #   # @geometries.map {|polygon| "(" + polygon.text_representation(allow_z,allow_m) + ")"}.join(",")
 # end
 
-#       def to_coordinates
-#         geometries.map{|polygon| polygon.to_coordinates}
-#       end
-
-#       def as_json(options = {})
-#         {:type => 'MultiPolygon',
-#          :coordinates => self.to_coordinates}
-#       end
 
 #       # simple geojson representation
 #       # TODO add CRS / SRID support?
