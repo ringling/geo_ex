@@ -27,6 +27,10 @@ defmodule PolygonTest do
     assert Polygon.to_coordinates(polygon) == coordinates
   end
 
+  test "to json" do
+    assert Polygon.to_json(@poly) == "{\"type\":\"Polygon\",\"coordinates\":[[[0,0],[4,0],[4,4],[0,4],[0,0]],[[1,1],[3,1],[3,3],[1,3],[1,1]]]}"
+  end
+
   #no test of the binary representation for linear_rings : always with polygons and like line_string
 
     # it "should test_polygon_creation" do

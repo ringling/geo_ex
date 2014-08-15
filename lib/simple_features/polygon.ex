@@ -59,6 +59,13 @@ defmodule SimpleFeatures.Polygon do
     end
   end
 
+  def to_json(point) do
+    %{ type: "Polygon", coordinates: to_coordinates(point) }
+    |> Poison.Encoder.encode([])
+    |> IO.iodata_to_binary
+  end
+
+
   def points(polygon) do
     polygon.rings
     |> Enum.map(fn(ring) -> ring.points end)
@@ -159,17 +166,6 @@ end
 #         result += "</Polygon>\n"
 #       end
 
-#       def as_json(options = {})
-#         {:type => 'Polygon',
-#          :coordinates => self.to_coordinates}
-#       end
-
-#       # simple geojson representation
-#       # TODO add CRS / SRID support?
-#       def to_json(options = {})
-#         as_json(options).to_json(options)
-#       end
-#       alias :as_geojson :to_json
 
 #     end
 

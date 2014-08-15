@@ -197,7 +197,6 @@ defmodule SimpleFeatures.Point do
 
   @doc "html representation"
   def html_representation(point, options \\ %{coord: true, full: false}) do
-    # options[:coord] = true if options[:coord].nil?
     out =  "<span class='geo'>"
     out = out <> "<abbr class='latitude' title='#{point.x}'>#{as_lat(point, options)}</abbr>"
     out = out <> "<abbr class='longitude' title='#{point.y}'>#{as_long(point, options)}</abbr>"
