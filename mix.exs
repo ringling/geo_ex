@@ -18,7 +18,8 @@ defmodule GeoEx.Mixfile do
   defp deps do
     [
       {:apex, "~>0.3.0"},
-      {:exprintf, github: "parroty/exprintf"}
+      {:exprintf, github: "parroty/exprintf"},
+      {:poison, github: "devinus/poison"},
     ]
 
   end

@@ -43,11 +43,13 @@ defmodule SimpleFeatures.MultiPolygon do
     multi_polygon.geometries |> Enum.map fn(polygon) -> SimpleFeatures.Polygon.to_coordinates(polygon) end
   end
 
-  def as_json(multi_polygon) do
-    [
+  def to_json(multi_polygon) do
+    %{
       type: "MultiPolygon",
       coordinates: to_coordinates(multi_polygon)
-    ]
+    }
+    |> Poison.Encoder.encode([])
+    |> IO.iodata_to_binary
   end
 
 end

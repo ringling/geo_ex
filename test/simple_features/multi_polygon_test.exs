@@ -12,6 +12,13 @@ defmodule MultiPolygonTest do
   @poly2 SimpleFeatures.Polygon.from_coordinates(@polygon_coordinates1, 256)
   @mp MultiPolygon.from_polygons([@poly1, @poly2],256)
 
+  @polygon_coordinates3 [[[0,0],[0,2],[2,2],[2,0],[0,0]]]
+  @polygon_coordinates4 [[[0,4],[4,4],[4,8],[0,8],[0,4]]]
+  @poly3 SimpleFeatures.Polygon.from_coordinates(@polygon_coordinates3,256)
+  @poly4 SimpleFeatures.Polygon.from_coordinates(@polygon_coordinates4, 256)
+  @multi_poly MultiPolygon.from_polygons([@poly3, @poly4],256)
+
+
   test "multi_polygon from polygons creation" do
     multi_polygon1 = MultiPolygon.from_polygons([@poly1, @poly2],256)
     assert length(multi_polygon1.geometries) == 2
@@ -46,30 +53,25 @@ defmodule MultiPolygonTest do
   end
 
   test "contains point" do
-    poly1 = SimpleFeatures.Polygon.from_coordinates([[[0,0],[0,2],[2,2],[2,0],[0,0]]],256)
-    poly2 = SimpleFeatures.Polygon.from_coordinates([[[0,4],[4,4],[4,8],[0,8],[0,4]]], 256)
-    multi_poly = MultiPolygon.from_polygons([poly1, poly2],256)
     inside = SimpleFeatures.Point.from_coordinates([0,0],256)
-    assert MultiPolygon.contains_point?(multi_poly, inside) == true
+    assert MultiPolygon.contains_point?(@multi_poly, inside) == true
   end
 
   test "doesn't contains point" do
-    poly1 = SimpleFeatures.Polygon.from_coordinates([[[0,0],[0,2],[2,2],[2,0],[0,0]]],256)
-    poly2 = SimpleFeatures.Polygon.from_coordinates([[[0,4],[4,4],[4,8],[0,8],[0,4]]], 256)
-    multi_poly = MultiPolygon.from_polygons([poly1, poly2],256)
     on_border = SimpleFeatures.Point.from_coordinates([4.0,4.0],256)
     outside = SimpleFeatures.Point.from_coordinates([4.1,4.1],256)
-    assert MultiPolygon.contains_point?(multi_poly, on_border) == false
-    assert MultiPolygon.contains_point?(multi_poly, outside) == false
+    assert MultiPolygon.contains_point?(@multi_poly, on_border) == false
+    assert MultiPolygon.contains_point?(@multi_poly, outside) == false
   end
 
   test "to coordinates" do
-    points1 = [[[0,0],[0,2],[2,2],[2,0],[0,0]]]
-    points2 = [[[0,4],[4,4],[4,8],[0,8],[0,4]]]
-    poly1 = SimpleFeatures.Polygon.from_coordinates(points1,256)
-    poly2 = SimpleFeatures.Polygon.from_coordinates(points2, 256)
-    multi_poly = MultiPolygon.from_polygons([poly1, poly2],256)
-    MultiPolygon.to_coordinates(multi_poly) == [points1, points2]
+    assert MultiPolygon.to_coordinates(@multi_poly) == [@polygon_coordinates3, @polygon_coordinates4]
+  end
+
+
+  test "as json" do
+    json = "{\"type\":\"MultiPolygon\",\"coordinates\":[[[[0,0],[0,2],[2,2],[2,0],[0,0]]],[[[0,4],[4,4],[4,8],[0,8],[0,4]]]]}"
+    assert MultiPolygon.to_json(@multi_poly) == json
   end
 
   defp coordinate_seq_to_point_seq(coordinates_sequence, srid) do
