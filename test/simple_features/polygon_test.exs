@@ -31,6 +31,16 @@ defmodule PolygonTest do
     assert Polygon.to_json(@poly) == "{\"type\":\"Polygon\",\"coordinates\":[[[0,0],[4,0],[4,4],[0,4],[0,0]],[[1,1],[3,1],[3,3],[1,3],[1,1]]]}"
   end
 
+  test "test_polygon_equal" do
+    polygon1 = SimpleFeatures.Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]],256)
+    polygon2 = SimpleFeatures.Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06]]])
+    point = SimpleFeatures.Point.from_x_y(12.4,-45.3,123)
+
+    assert polygon1 == SimpleFeatures.Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]],256)
+    refute polygon1 == polygon2
+    refute polygon1 == point
+  end
+
   #no test of the binary representation for linear_rings : always with polygons and like line_string
 
     # it "should test_polygon_creation" do
@@ -84,18 +94,6 @@ defmodule PolygonTest do
     #   polygon[1].should == linear_ring2
     # end
 
-
-
-
-    # it "test_polygon_equal" do
-    #   polygon1 = GeoRuby::SimpleFeatures::Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]],256)
-    #   polygon2 = GeoRuby::SimpleFeatures::Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06]]])
-    #   point = GeoRuby::SimpleFeatures::Point.from_x_y(12.4,-45.3,123)
-
-    #   polygon1.should  == GeoRuby::SimpleFeatures::Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]],256)
-    #   polygon1.should_not == polygon2
-    #   polygon1.should_not == point
-    # end
 
     # it "test_polygon_binary" do
     #   polygon = GeoRuby::SimpleFeatures::Polygon.from_coordinates([[[0,0],[4,0],[4,4],[0,4],[0,0]],[[1,1],[3,1],[3,3],[1,3],[1,1]]],256)
