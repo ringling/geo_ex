@@ -46,13 +46,18 @@ defmodule SimpleFeatures.Point do
     %Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
 
-    # Simple geojson representation
-    # TODO add CRS / SRID support?
-    def to_json(point) do
-      %{ type: "Point", coordinates: to_coordinates(point) }
-      |> Poison.Encoder.encode([])
-      |> IO.iodata_to_binary
-    end
+  def as_map(point) do
+    %{ type: "Point", coordinates: to_coordinates(point) }
+  end
+
+  # Simple geojson representation
+  # TODO add CRS / SRID support?
+  def to_json(point) do
+    point
+    |> as_map
+    |> Poison.Encoder.encode([])
+    |> IO.iodata_to_binary
+  end
 
 
   def from_coordinates(coordinates) do

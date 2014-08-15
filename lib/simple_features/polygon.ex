@@ -59,8 +59,13 @@ defmodule SimpleFeatures.Polygon do
     end
   end
 
-  def to_json(point) do
+  def as_map(point) do
     %{ type: "Polygon", coordinates: to_coordinates(point) }
+  end
+
+  def to_json(point) do
+    point
+    |> as_map
     |> Poison.Encoder.encode([])
     |> IO.iodata_to_binary
   end

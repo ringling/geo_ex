@@ -41,8 +41,13 @@ defmodule SimpleFeatures.MultiPoint do
     points(multi_point) |> Enum.map fn(p) -> Point.to_coordinates(p) end
   end
 
-  def to_json(multi_point) do
+  def as_map(multi_point) do
     %{type: "MultiPoint", coordinates: to_coordinates(multi_point) }
+  end
+
+  def to_json(multi_point) do
+    multi_point
+    |> as_map
     |> Poison.Encoder.encode([])
     |> IO.iodata_to_binary
   end

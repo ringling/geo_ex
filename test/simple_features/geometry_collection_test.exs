@@ -26,6 +26,14 @@ defmodule GeometryCollectionTest do
     assert hd(bbox) == point1
   end
 
+  test "to json" do
+    geo_coll_json = "{\"type\":\"GeometryCollection\",\"geometries\":[{\"type\":\"Point\",\"coordinates\":[1,1]},{\"type\":\"Point\",\"coordinates\":[2,2]}]}"
+    point1 = SimpleFeatures.Point.from_x_y(1,1,256)
+    point2 = SimpleFeatures.Point.from_x_y(2,2,256)
+    geometry_collection = SimpleFeatures.GeometryCollection.from_geometries([point1, point2])
+    assert SimpleFeatures.GeometryCollection.to_json(geometry_collection) ==  geo_coll_json
+  end
+
 end
 
 

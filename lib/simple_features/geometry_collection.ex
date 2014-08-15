@@ -23,6 +23,19 @@ defmodule SimpleFeatures.GeometryCollection do
     end
   end
 
+
+  def to_json(geometry_collection) do
+    geometry_maps = geometry_collection.geometries |> Enum.map fn(geometry) -> _as_map(geometry) end
+    %{ type: "GeometryCollection", geometries: geometry_maps }
+    |> Poison.Encoder.encode([])
+    |> IO.iodata_to_binary
+  end
+
+  defp _as_map(geometry) do
+    fun = Module.function(geometry.__struct__, :as_map, 1)
+    fun.(geometry)
+  end
+
   defp _reduce(geometries, init_values) do
     geometries |> Enum.reduce init_values, fn(geometry, acc) -> find_min_max(geometry, acc) end
   end
@@ -48,8 +61,6 @@ defmodule SimpleFeatures.GeometryCollection do
   end
 
 end
-
-
 
 # module GeoRuby
 #   module SimpleFeatures
@@ -83,18 +94,6 @@ end
 #       def text_representation(allow_z=true,allow_m=true) #:nodoc:
 #         @geometries.collect{|geometry| geometry.as_ewkt(false,allow_z,allow_m)}.join(",")
 #       end
-
-#       def as_json(options = {})
-#         {:type => 'GeometryCollection',
-#          :geometries => self.geometries}
-#       end
-
-#       # simple geojson representation
-#       # TODO add CRS / SRID support?
-#       def to_json(options = {})
-#         as_json(options).to_json(options)
-#       end
-#       alias :as_geojson :to_json
 
 #       #georss simple representation : outputs only the first geometry of the collection
 #       def georss_simple_representation(options)#:nodoc:
