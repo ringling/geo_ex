@@ -336,4 +336,8 @@ defmodule PointTest do
     assert is_list(polar)
   end
 
+  test "to json" do
+    assert Point.to_json(@p1) == "{\"type\":\"Point\",\"coordinates\":[1,1]}"
+  end
+
 end

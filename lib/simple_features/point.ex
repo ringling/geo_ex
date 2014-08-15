@@ -11,13 +11,6 @@ defmodule SimpleFeatures.Point do
   defdelegate as_ewkt(point), to: Geometry
   defstruct x: nil, y: nil, z: nil, m: nil, srid: nil, lat: nil, lng: nil, binary_geometry_type: 1, text_geometry_type: "POINT"
 
-  # alias :lon :x
-  # alias :lng :x
-  # alias :lat :y
-  # alias :rad :r
-  # alias :tet :t
-  # alias :tetha :t
-
   def bounding_box(point) do
     [point, point]
   end
@@ -52,6 +45,15 @@ defmodule SimpleFeatures.Point do
     y = r * Math.sin(t)
     %Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
+
+    # Simple geojson representation
+    # TODO add CRS / SRID support?
+    def to_json(point) do
+      %{ type: "Point", coordinates: to_coordinates(point) }
+      |> Poison.Encoder.encode([])
+      |> IO.iodata_to_binary
+    end
+
 
   def from_coordinates(coordinates) do
     from_coord(coordinates, default_srid, false)
