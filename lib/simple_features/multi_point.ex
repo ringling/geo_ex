@@ -41,14 +41,13 @@ defmodule SimpleFeatures.MultiPoint do
     points(multi_point) |> Enum.map fn(p) -> Point.to_coordinates(p) end
   end
 
+  def to_json(multi_point) do
+    %{type: "MultiPoint", coordinates: to_coordinates(multi_point) }
+    |> Poison.Encoder.encode([])
+    |> IO.iodata_to_binary
+  end
 end
 
-
-
-#       def as_json(options = {})
-#         {:type => 'MultiPoint',
-#          :coordinates => self.to_coordinates}
-#       end
 
 #       # simple geojson representation
 #       # TODO add CRS / SRID support?

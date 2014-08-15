@@ -3,9 +3,12 @@ defmodule MultiPointTest do
   alias SimpleFeatures.MultiPoint, as: MultiPoint
   alias SimpleFeatures.Point, as: Point
 
+
+  @multi_point MultiPoint.from_coordinates([[12.4,-123.3],[-65.1,123.4],[123.55555555,123]],444)
+
   test "multi_point creation" do
-    multi_point = MultiPoint.from_coordinates([[12.4,-123.3],[-65.1,123.4],[123.55555555,123]],444)
-    [a, _b, c] = multi_point.geometries
+
+    [a, _b, c] = @multi_point.geometries
     assert a == Point.from_x_y(12.4, -123.3, 444)
     assert c == Point.from_x_y(123.55555555, 123, 444)
   end
@@ -39,6 +42,10 @@ defmodule MultiPointTest do
     mp = MultiPoint.from_coordinates([[12.4,-123.3],[-65.1,123.4],[123.55555555,123]],444)
     assert length(mp.geometries) == 3
     assert length(MultiPoint.points(mp)) == 3
+  end
+
+  test "to json" do
+    assert MultiPoint.to_json(@multi_point) == "{\"type\":\"MultiPoint\",\"coordinates\":[[12.4,-123.3],[-65.1,123.4],[123.55555555,123]]}"
   end
 
 end
