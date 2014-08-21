@@ -11,34 +11,56 @@ defmodule SimpleFeatures.Point do
   defdelegate as_ewkt(point), to: Geometry
   defstruct x: nil, y: nil, z: nil, m: nil, srid: nil, lat: nil, lng: nil, binary_geometry_type: 1, text_geometry_type: "POINT"
 
+  @doc "Retuns bounding box in 2D/3D. Returns a list of 2 points"
   def bounding_box(point) do
     [point, point]
   end
 
+  @doc """
+  Returns `true` if point has a z-coordinate"
+  """
   def with_z?(point) do
     point.z != nil
   end
 
+  @doc """
+  Returns `true` if point has a measurement dimension"
+  """
   def with_m?(point) do
     point.m != nil
   end
 
+  @doc """
+  Returns 2D `Point`
+  """
   def from_x_y(x, y, srid \\ 0) do
     %Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
 
+  @doc """
+  Returns 3D `Point`
+  """
   def from_x_y_z(x, y, z, srid \\ default_srid) do
     %Point{x: x, y: y, lat: x, lng: y, z: z, srid: srid}
   end
 
+  @doc """
+  Returns 2D `Point` with a measurement dimension
+  """
   def from_x_y_m(x, y, m, srid \\ default_srid) do
     %Point{x: x, y: y, lat: x, lng: y, m: m, srid: srid}
   end
 
+  @doc """
+  Returns 3D `Point` with a measurement dimension
+  """
   def from_x_y_z_m(x, y, z, m, srid \\ default_srid) do
     %Point{x: x, y: y, lat: x, lng: y, z: z, m: m, srid: srid}
   end
 
+  @doc """
+  Returns 2D `Point` from vector function `r(t)`
+  """
   def from_r_t(r, t, srid \\ default_srid) do
     t = t * deg2rad
     x = r * Math.cos(t)
@@ -46,12 +68,21 @@ defmodule SimpleFeatures.Point do
     %Point{x: x, y: y, lat: x, lng: y, srid: srid}
   end
 
+  @doc """
+  Returns `Point` as `Map`
+  """
   def as_map(point) do
     %{ type: "Point", coordinates: to_coordinates(point) }
   end
 
-  # Simple geojson representation
-  # TODO add CRS / SRID support?
+
+  @doc """
+  Returns `Point` as jsom
+
+  Simple geojson representation
+
+  *TODO:* add CRS / SRID support?
+  """
   def to_json(point) do
     point
     |> as_map
@@ -59,23 +90,37 @@ defmodule SimpleFeatures.Point do
     |> IO.iodata_to_binary
   end
 
-
+  @doc """
+  Returns `Point` from `List` of coordinates
+  """
   def from_coordinates(coordinates) do
     from_coord(coordinates, default_srid, false)
   end
 
+  @doc """
+  Returns `Point` with srid from `List` of coordinates
+  """
   def from_coordinates(coordinates, srid) do
     from_coord(coordinates, srid, false)
   end
 
+  @doc """
+  Returns `Point` with srid and measurement dimension from `List` of coordinates
+  """
   def from_coordinates(coordinates, srid, with_m) do
     from_coord(coordinates, srid, with_m)
   end
 
+  @doc """
+  Returns euclidian distance between 2 points
+  """
   def euclidian_distance(p1, p2) do
     Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2))
   end
 
+  @doc """
+  Returns spherical distance in meters between 2 points
+  """
   def spherical_distance(p1, p2, r \\ 6370997.0) do
     dlat = (p2.lat - p1.lat) * deg2rad / 2
     dlon = (p2.lng - p1.lng) * deg2rad / 2
@@ -86,42 +131,18 @@ defmodule SimpleFeatures.Point do
     r * c
   end
 
-  @doc "Outputs theta - TODO ugly code"
-  def theta_rad(p) do
-    _theta_rad(p.x, p.y)
-  end
-
-  @doc "Outputs theta in degrees"
-  def theta_deg(p) do
-    theta_rad(p) / deg2rad
-  end
-
-  @doc "Outputs an array containing polar distance and theta"
-  def as_polar(p) do
-    [r(p), theta_deg(p)]
-  end
-
   @doc """
-  Polar stuff
-  http://www.engineeringtoolbox.com/converting-cartesian-polar-coordinates-d_1347.html
-  http://rcoordinate.rubyforge.org/svn/point.rb
-  outputs radium
+  Returns ellipsoidal distance in meters between 2 points
   """
-  def r(p) do
-    r(p.x,p.y)
-  end
-
-  def r(x,y) do
-    Math.sqrt(Math.pow(x,2) + Math.pow(y,2))
-  end
-
   def ellipsoidal_distance(p1, p2, a \\ 6378137.0, b \\ 6356752.3142) do
     EllipsoidalCalculations.distance(p1, p2, a, b)
   end
 
   @doc """
-  Possible BUG, I'm not sure calculates correct (Thomas Ringling - 20140713)
-  Orthogonal Distance
+  Returns orthogonal distance
+
+  *Possible BUG*, I'm not sure calculates correct (Thomas Ringling - 20140713)
+
   Based http://www.allegro.cc/forums/thread/589720
   """
   def orthogonal_distance(point, line, tail \\ nil) do # TODO tail not nil, is not tested
@@ -139,6 +160,51 @@ defmodule SimpleFeatures.Point do
     end
   end
 
+  @doc """
+  Returns `Point` as theta radians
+  """
+  def theta_rad(p) do
+    _theta_rad(p.x, p.y)
+  end
+
+  @doc """
+  Returns `Point` as theta degrees
+  """
+  def theta_deg(p) do
+    theta_rad(p) / deg2rad
+  end
+
+  @doc "Outputs an array containing polar distance and theta"
+
+  @doc """
+  Returns `Point` as polar coordinates
+  """
+  def as_polar(p) do
+    [r(p), theta_deg(p)]
+  end
+
+  @doc """
+  Returns distance from origin to `Point`
+
+  http://www.engineeringtoolbox.com/converting-cartesian-polar-coordinates-d_1347.html
+
+  http://rcoordinate.rubyforge.org/svn/point.rb
+  """
+  def r(p) do
+    r(p.x,p.y)
+  end
+
+  @doc """
+  Returns distance from origin to x,y coordinate
+
+  http://www.engineeringtoolbox.com/converting-cartesian-polar-coordinates-d_1347.html
+
+  http://rcoordinate.rubyforge.org/svn/point.rb
+  """
+  def r(x,y) do
+    Math.sqrt(Math.pow(x,2) + Math.pow(y,2))
+  end
+
   @doc "Bearing from a point to another, in degrees."
   def bearing_to(p1, p2) do
     Bearing.bearing_to(p1, p2)
@@ -151,11 +217,7 @@ defmodule SimpleFeatures.Point do
 
   @doc "TODO Should support 'with_m' analogous to from_coordinates"
   def to_coordinates(point) do
-    if with_z?(point) do
-      [point.x, point.y, point.z]
-    else
-      [point.x, point.y]
-    end
+    if with_z?(point), do: [point.x, point.y, point.z], else: [point.x, point.y]
   end
 
   def text_representation(point, true, false) do
@@ -253,6 +315,7 @@ defmodule SimpleFeatures.Point do
   def as_long(point, options \\ %{}) do
     human_representation(%{ y: point.y }, options) |> Enum.join ""
   end
+
   def as_lng(y, options \\ %{}) do
     as_long(y, options)
   end
