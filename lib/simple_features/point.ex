@@ -205,39 +205,52 @@ defmodule SimpleFeatures.Point do
     Math.sqrt(Math.pow(x,2) + Math.pow(y,2))
   end
 
-  @doc "Bearing from a point to another, in degrees."
+  @doc """
+  Bearing from a `Point` to another, in degrees.
+  """
   def bearing_to(p1, p2) do
     Bearing.bearing_to(p1, p2)
   end
 
+  @doc """
+  Bearing from a `Point` to another, in text e.g. :w, :s or :sw
+  """
   def bearing_text(p1, p2) do
     bearing = Point.bearing_to(p1,p2)
     Bearing.bearing_text(bearing)
   end
 
-  @doc "TODO Should support 'with_m' analogous to from_coordinates"
+  @doc """
+  `Point` to coordinates, e.g. [x,y,z]
+
+  TODO Should support 'with_m' analogous to from_coordinates
+  """
   def to_coordinates(point) do
     if with_z?(point), do: [point.x, point.y, point.z], else: [point.x, point.y]
   end
 
-  def text_representation(point, true, false) do
+
+  @doc """
+  `Point` as text, e.g. "-11.2431 32.3141 34.5445"
+  """
+  def text_representation(point) do
+    String.rstrip text_representation(point, nil?(point.z), nil?(point.m))
+  end
+
+  defp text_representation(point, false, false) do
+    "#{point.x} #{point.y}"
+  end
+
+  defp text_representation(point, true, false) do
     String.rstrip "#{point.x} #{point.y} #{point.z}"
   end
 
-  def text_representation(point, false, true) do
+  defp text_representation(point, false, true) do
     String.rstrip "#{point.x} #{point.y} #{point.m}"
   end
 
-  def text_representation(point, true, true) do
+  defp text_representation(point, true, true) do
     String.rstrip "#{point.x} #{point.y} #{point.z} #{point.m}"
-  end
-
-  def text_representation(point, false, false) do
-    text_representation(point)
-  end
-
-  def text_representation(point) do
-    "#{point.x} #{point.y}"
   end
 
   @doc "georss simple representation"

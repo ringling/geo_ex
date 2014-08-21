@@ -62,7 +62,7 @@ defmodule LineStringTest do
     assert LineString.as_ewkt(line_string) == "SRID=256;LINESTRING(12.4 -45.3,45.4 41.6)"
 
     line_string = LineString.from_coordinates([[12.4,-45.3,35.3],[45.4,41.6,12.3]],256)
-    assert LineString.as_ewkt(line_string, true) == "SRID=256;LINESTRING(12.4 -45.3 35.3,45.4 41.6 12.3)"
+    assert LineString.as_ewkt(line_string, true) ==  "SRID=256;LINESTRING(12.4 -45.3 35.3,45.4 41.6 12.3)"
 
     line_string = LineString.from_coordinates([[12.4,-45.3,35.3],[45.4,41.6,12.3]], 256, true)
     assert LineString.as_ewkt(line_string, true, true, true) == "SRID=256;LINESTRINGM(12.4 -45.3 35.3,45.4 41.6 12.3)"

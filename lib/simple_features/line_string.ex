@@ -30,7 +30,7 @@ defmodule SimpleFeatures.LineString do
 
   @doc "Text representation of a polygon"
   def text_representation(line, allow_z \\ true, allow_m \\ true) do
-    Enum.map_join(line.points, ",", &(Point.text_representation(&1, allow_z, allow_m)))
+    Enum.map_join(line.points, ",", &(Point.text_representation(&1)))
   end
 
   def to_coordinates(line_string) do
