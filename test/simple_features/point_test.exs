@@ -39,6 +39,11 @@ defmodule PointTest do
     assert Point.to_coordinates(point) == [10,20,30]
   end
 
+  test "to x y z m coordinates" do
+    point = Point.from_x_y_z_m(10, 20, 30, 40, 123)
+    assert Point.to_coordinates(point) == [10,20,30,40]
+  end
+
   test "with z" do
     point = Point.from_x_y_z(10, 20, 30, 123)
     assert Point.with_z?(point) == true
@@ -195,8 +200,9 @@ defmodule PointTest do
   end
 
    test "parses lat long" do
-    assert_in_delta Point.from_latlong("-20° 47' 26.37","-20° 47' 26.37").x, -20.790658, 0.00001
-    assert_in_delta Point.from_latlong("-20° 47' 26.37","-20° 47' 26.37").y, -20.790658, 0.00001
+    point = Point.from_latlong("-20° 47' 26.37", "-20° 47' 26.37")
+    assert_in_delta point.x, -20.790658, 0.00001
+    assert_in_delta point.y, -20.790658, 0.00001
   end
 
   test "parse lat long w/o sec" do
@@ -204,8 +210,9 @@ defmodule PointTest do
   end
 
   test "accepts with W or S notation" do
-    assert_in_delta Point.from_latlong("20° 47' 26.37 W","20° 47' 26.37 S").x, -20.790658, 0.00001
-    assert_in_delta Point.from_latlong("20° 47' 26.37 W","20° 47' 26.37 S").y, -20.790658, 0.00001
+    point = Point.from_latlong("20° 47' 26.37 W","20° 47' 26.37 S")
+    assert_in_delta point.x, -20.790658, 0.00001
+    assert_in_delta point.y, -20.790658, 0.00001
   end
 
   test "should instantiate a point from positive degrees" do
