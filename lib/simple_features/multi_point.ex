@@ -29,18 +29,30 @@ defmodule SimpleFeatures.MultiPoint do
     "(" <> Enum.join(Enum.map(multi_point.geometries, fn(point) -> Point.text_representation(point) end), "),(") <> ")"
   end
 
+  @doc """
+  Returns `true` if at least one `Point` in the `MultiPoint` has a m-dimension
+  """
   def with_m?(multi_point) do
     Enum.any?(multi_point.geometries, fn(geometry) -> Point.with_m?(geometry) end)
   end
 
+  @doc """
+  `MultiPoint` to coordinates, e.g. [[x1,y1,z1],[x2,y2,z2],...]
+  """
   def to_coordinates(multi_point) do
     multi_point.geometries |> Enum.map fn(p) -> Point.to_coordinates(p) end
   end
 
+  @doc """
+  Returns `MultiPoint` as a `Map`
+  """
   def as_map(multi_point) do
     %{type: "MultiPoint", coordinates: to_coordinates(multi_point) }
   end
 
+  @doc """
+  Returns `MultiPoint` as a JSON string
+  """
   def to_json(multi_point) do
     multi_point
     |> as_map

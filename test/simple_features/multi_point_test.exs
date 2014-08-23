@@ -3,7 +3,6 @@ defmodule MultiPointTest do
   alias SimpleFeatures.MultiPoint, as: MultiPoint
   alias SimpleFeatures.Point, as: Point
 
-
   @multi_point MultiPoint.from_coordinates([[12.4,-123.3],[-65.1,123.4],[123.55555555,123]],444)
 
   test "multi_point creation" do
@@ -25,7 +24,8 @@ defmodule MultiPointTest do
   # end
 
   test "to_coordinates" do
-    "IMPLEMENT"
+    multi_point = MultiPoint.from_coordinates([[12.4,-123.3],[-65.1,123.4],[123.55555555,123]],444)
+    assert MultiPoint.to_coordinates(multi_point) == [[12.4, -123.3], [-65.1, 123.4], [123.55555555, 123]]
   end
 
   test "multi_point ewkt" do

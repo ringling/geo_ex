@@ -31,6 +31,9 @@ defmodule SimpleFeatures.LineString do
     Enum.map_join(line.points, ",", &(Point.text_representation(&1)))
   end
 
+  @doc """
+  `LineString` to coordinates, e.g. [[x1,y1,z1],[x2,y2,z2],...]
+  """
   def to_coordinates(line_string) do
     line_string.points |> Enum.map fn(point) -> Point.to_coordinates(point) end
   end
@@ -123,7 +126,7 @@ defmodule SimpleFeatures.LineString do
   end
 
   @doc """
-  Returns `true` if at least one `Point`in the linstring has a z-dimension
+  Returns `true` if at least one `Point` in the linstring has a z-dimension
   """
   def with_z?(line) do
     Enum.any?(line.points, fn(point) -> Point.with_z?(point) end)
