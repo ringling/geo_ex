@@ -7,10 +7,6 @@ defmodule SimpleFeatures.MultiPoint do
   defdelegate as_ewkt(multi_point, allow_srid, allow_z, allow_m), to: GeometryHelper
   defstruct geometries: [], srid: default_srid, binary_geometry_type: 4, text_geometry_type: "MULTIPOINT"
 
-  def points(multi_point) do
-    multi_point.geometries
-  end
-
   @doc "Creates a new line string. Accept a sequence of coordinates as argument : ((x,y)...(x,y))"
   def from_coordinates(coordinates, srid \\ default_srid) do
     points = Enum.map coordinates, fn(coordinate) -> Point.from_coordinates(coordinate, srid) end
@@ -38,7 +34,7 @@ defmodule SimpleFeatures.MultiPoint do
   end
 
   def to_coordinates(multi_point) do
-    points(multi_point) |> Enum.map fn(p) -> Point.to_coordinates(p) end
+    multi_point.geometries |> Enum.map fn(p) -> Point.to_coordinates(p) end
   end
 
   def as_map(multi_point) do
@@ -52,11 +48,3 @@ defmodule SimpleFeatures.MultiPoint do
     |> IO.iodata_to_binary
   end
 end
-
-
-#       # simple geojson representation
-#       # TODO add CRS / SRID support?
-#       def to_json(options = {})
-#         as_json(options).to_json(options)
-#       end
-#       alias :as_geojson :to_json

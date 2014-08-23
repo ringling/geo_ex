@@ -38,12 +38,6 @@ defmodule MultiPointTest do
     assert ewkt == "SRID=444;MULTIPOINT((12.4 -123.3 4.5),(-65.1 123.4 6.7),(123.55555555 123 7.8))"
   end
 
-  test "respond to points" do
-    mp = MultiPoint.from_coordinates([[12.4,-123.3],[-65.1,123.4],[123.55555555,123]],444)
-    assert length(mp.geometries) == 3
-    assert length(MultiPoint.points(mp)) == 3
-  end
-
   test "to json" do
     assert MultiPoint.to_json(@multi_point) == "{\"type\":\"MultiPoint\",\"coordinates\":[[12.4,-123.3],[-65.1,123.4],[123.55555555,123]]}"
   end
