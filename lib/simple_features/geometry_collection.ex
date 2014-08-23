@@ -32,7 +32,7 @@ defmodule SimpleFeatures.GeometryCollection do
   end
 
   defp _as_map(geometry) do
-    fun = Module.function(geometry.__struct__, :as_map, 1)
+    fun = :erlang.make_fun(geometry.__struct__, :as_map, 1)
     fun.(geometry)
   end
 
