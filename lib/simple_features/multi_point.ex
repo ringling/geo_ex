@@ -1,8 +1,8 @@
 defmodule SimpleFeatures.MultiPoint do
   import SimpleFeatures.Geometry
-  alias SimpleFeatures.Point, as: Point
+  alias SimpleFeatures.Point
   alias __MODULE__
-  alias SimpleFeatures.GeometryHelper, as: GeometryHelper
+  alias SimpleFeatures.GeometryHelper
 
   defdelegate as_ewkt(multi_point, allow_srid, allow_z, allow_m), to: GeometryHelper
   defstruct geometries: [], srid: default_srid, binary_geometry_type: 4, text_geometry_type: "MULTIPOINT"
@@ -29,8 +29,8 @@ defmodule SimpleFeatures.MultiPoint do
   end
 
   @doc "Text representation of a MultiPoint"
-  def text_representation(multi_point, allow_z, allow_m) do
-    "(" <> Enum.join(Enum.map(multi_point.geometries, fn(point) -> Point.text_representation(point, allow_z, allow_m) end), "),(") <> ")"
+  def text_representation(multi_point, _allow_z, _allow_m) do
+    "(" <> Enum.join(Enum.map(multi_point.geometries, fn(point) -> Point.text_representation(point) end), "),(") <> ")"
   end
 
   def with_m?(multi_point) do
