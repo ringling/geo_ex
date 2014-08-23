@@ -57,13 +57,17 @@ defmodule LineStringTest do
     assert b == Point.from_x_y_z(45.4, 41.6, 987)
   end
 
-  test "test_line_string_text" do
+  test "test_line_string_text 3d" do
+    line_string = LineString.from_coordinates([[12.4,-45.3,35.3],[45.4,41.6,12.3]],256)
+    assert LineString.as_ewkt(line_string, true, true) ==  "SRID=256;LINESTRING(12.4 -45.3 35.3,45.4 41.6 12.3)"
+  end
+
+  test "test_line_string_text 2d" do
     line_string = LineString.from_coordinates([[12.4,-45.3],[45.4,41.6]],256)
     assert LineString.as_ewkt(line_string) == "SRID=256;LINESTRING(12.4 -45.3,45.4 41.6)"
+  end
 
-    line_string = LineString.from_coordinates([[12.4,-45.3,35.3],[45.4,41.6,12.3]],256)
-    assert LineString.as_ewkt(line_string, true) == "SRID=256;LINESTRING(12.4 -45.3 35.3,45.4 41.6 12.3)"
-
+  test "test_line_string_text" do
     line_string = LineString.from_coordinates([[12.4,-45.3,35.3],[45.4,41.6,12.3]], 256, true)
     assert LineString.as_ewkt(line_string, true, true, true) == "SRID=256;LINESTRINGM(12.4 -45.3 35.3,45.4 41.6 12.3)"
 

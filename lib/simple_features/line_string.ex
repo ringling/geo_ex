@@ -4,10 +4,8 @@ defmodule SimpleFeatures.LineString do
   alias __MODULE__
 
   @moduledoc """
-  Represents a line string as an list of points (see Point).
+  Represents a line string as an list of points (see `Point`).
   """
-
-  # defdelegate as_ewkt(line_string, allow_srid, allow_z, allow_m), to: Geometry
 
   defstruct points: [], srid: default_srid, binary_geometry_type: 2, text_geometry_type: "LINESTRING"
 
@@ -29,8 +27,8 @@ defmodule SimpleFeatures.LineString do
   end
 
   @doc "Text representation of a polygon"
-  def text_representation(line, allow_z \\ true, allow_m \\ true) do
-    Enum.map_join(line.points, ",", &(Point.text_representation(&1, allow_z, allow_m)))
+  def text_representation(line) do
+    Enum.map_join(line.points, ",", &(Point.text_representation(&1)))
   end
 
   def to_coordinates(line_string) do
@@ -70,8 +68,11 @@ defmodule SimpleFeatures.LineString do
     List.first(line_string.points) == List.last(line_string.points)
   end
 
-  def clockwise?(line) do
-    list = line.points
+  @doc """
+  Returns `true` if the orientation of the linestring is clockwise
+  """
+  def clockwise?(linestring) do
+    list = linestring.points
     [ first | [ second | _tail ] ] = list
     length = length(list)
     x = Enum.to_list(Stream.take(list, -(length-1)))
@@ -83,14 +84,20 @@ defmodule SimpleFeatures.LineString do
     sum < 0.0
   end
 
+  @doc """
+  Returns the spherical distance between all points in the linestring
+  """
   def spherical_distance(line) do
-    fun = Module.function(Point, :spherical_distance, 2)
+    fun = :erlang.make_fun(Point, :spherical_distance, 2)
     {_, total } = Enum.reduce(line.points, { nil, 0 }, fn(point, acc) -> add_point(point, acc, fun) end)
     total
   end
 
+  @doc """
+  Returns the euclidian distance between all points in the linestring
+  """
   def euclidian_distance(line) do
-    fun = Module.function(Point, :euclidian_distance, 2)
+    fun = :erlang.make_fun(Point, :euclidian_distance, 2)
     {_, total } = Enum.reduce(line.points, { nil, 0 }, fn(point, acc) -> add_point(point, acc, fun) end)
     total
   end
@@ -100,10 +107,10 @@ defmodule SimpleFeatures.LineString do
   http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
   """
   def simplify(line, epsilon \\ 1) do
-    from_points(do_simplify(line.points, epsilon))
+    line.points |> do_simplify(epsilon) |> from_points
   end
 
-  def do_simplify(list, epsilon) do
+  defp do_simplify(list, epsilon) do
     _do_simplify(list, dmax(list), epsilon)
   end
 
@@ -111,14 +118,20 @@ defmodule SimpleFeatures.LineString do
   def as_ewkt(line, allow_srid \\ true, allow_z \\ true, allow_m \\ true) do
     srid = srid_text(line, allow_srid)
     m = m_text(line, allow_m, allow_z)
-    text_rep = text_representation(line, with_z?(line), with_m?(line))
+    text_rep = text_representation(line)
     "#{srid}#{line.text_geometry_type}#{m}(#{text_rep})"
   end
 
+  @doc """
+  Returns `true` if at least one `Point`in the linstring has a z-dimension
+  """
   def with_z?(line) do
     Enum.any?(line.points, fn(point) -> Point.with_z?(point) end)
   end
 
+  @doc """
+  Returns `true` if at least one `Point`in the linstring has a m-dimension
+  """
   def with_m?(line) do
     Enum.any?(line.points, fn(point) -> Point.with_m?(point) end)
   end
