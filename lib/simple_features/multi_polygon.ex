@@ -58,16 +58,3 @@ defmodule SimpleFeatures.MultiPolygon do
   end
 
 end
-
-# @doc "Text representation of a MultiPolygon"
-# def text_representation(allow_z=true,allow_m=true) do
-#   # @geometries.map {|polygon| "(" + polygon.text_representation(allow_z,allow_m) + ")"}.join(",")
-# end
-
-
-#       # simple geojson representation
-#       # TODO add CRS / SRID support?
-#       def to_json(options = {})
-#         as_json(options).to_json(options)
-#       end
-#       alias :as_geojson :to_json

@@ -51,20 +51,6 @@ defmodule SimpleFeatures.GeometryHelper do
     ewkt <> "(" <> text_representation(geometry) <> ")"
   end
 
-  # @doc """
-  # Outputs the geometry as a HexEWKB string.
-  # It is almost the same as a WKB string, except that each byte of a WKB
-  # string is replaced by its hexadecimal 2-character representation in a HexEWKB string.
-  # """
-  # def as_hex_ewkb(geometry, allow_srid \\ true, allow_z \\ true, allow_m \\ true) do
-  #   as_ewkb(allow_srid, allow_z, allow_m).unpack('H*').join('').upcase
-  # end
-
-  # @doc "Outputs the geometry as a strict HexWKB string"
-  # def as_hex_wkb(geometry) do
-  #   as_hex_ewkb(geometry, false,false,false)
-  # end
-
   defp m_text(geometry, allow_m, allow_z) do
     if with_m?(geometry) && allow_m && (!with_z?(geometry) || !allow_z), do: "M", else: ""
   end
