@@ -9,7 +9,7 @@ defmodule SimpleFeatures.Point do
   """
 
   defdelegate as_ewkt(point), to: Geometry
-  defstruct x: nil, y: nil, z: nil, m: nil, srid: nil, lat: nil, lng: nil, binary_geometry_type: 1, text_geometry_type: "POINT"
+  defstruct x: nil, y: nil, z: nil, m: nil, srid: nil, lat: nil, lng: nil, binary_geometry_type: 1, text_geometry_type: "POINT", type: :point
 
   @doc "Retuns bounding box in 2D/3D. Returns a list of 2 points"
   def bounding_box(point) do
@@ -258,6 +258,11 @@ defmodule SimpleFeatures.Point do
 
   defp _text_representation(point) do
     "#{point.x} #{point.y} #{point.z} #{point.m}"
+  end
+
+
+  def as_hex_ewkb(point) do
+    WKB.encode(point)
   end
 
   @doc "georss simple representation"

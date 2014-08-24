@@ -2,7 +2,7 @@ defmodule SimpleFeatures.MultiPolygon do
   import SimpleFeatures.Geometry
   alias SimpleFeatures.GeometryHelper
 
-  defstruct geometries: [], srid: default_srid, binary_geometry_type: 6, text_geometry_type: "MULTIPOLYGON"
+  defstruct geometries: [], srid: default_srid, binary_geometry_type: 6, text_geometry_type: "MULTIPOLYGON", type: :multi_polygon
 
   @doc "Creates a multi polygon from a list of polygons"
   def from_polygons(polygons, srid \\ default_srid) do

@@ -347,4 +347,13 @@ defmodule PointTest do
     assert Point.to_json(@p1) == "{\"type\":\"Point\",\"coordinates\":[1,1]}"
   end
 
+  test "should printoout as binary" do
+    point = Point.from_x_y(12.4,45.3,123)
+    assert Point.as_hex_ewkb(point) == "01010000207B000000CDCCCCCCCCCC28406666666666A64640"
+    # point = GeoRuby::SimpleFeatures::Point.from_x_y_z_m(12.4,45.3,-3.5,15,123)
+    # point.as_hex_ewkb.should eql("01010000E07B000000CDCCCCCCCCCC28406666666666A646400000000000000CC00000000000002E40")
+    # point.as_hex_wkb.should eql("0101000000CDCCCCCCCCCC28406666666666A64640")
+  end
+
+
 end

@@ -7,7 +7,7 @@ defmodule SimpleFeatures.LineString do
   Represents a line string as an list of points (see `Point`).
   """
 
-  defstruct points: [], srid: default_srid, binary_geometry_type: 2, text_geometry_type: "LINESTRING"
+  defstruct points: [], srid: default_srid, binary_geometry_type: 2, text_geometry_type: "LINESTRING", type: :line_string
 
   @doc "Creates a new line string. Accept a sequence of coordinates as argument : ((x,y)...(x,y))"
   def from_coordinates(coordinates, srid \\ default_srid) do

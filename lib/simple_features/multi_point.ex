@@ -5,7 +5,7 @@ defmodule SimpleFeatures.MultiPoint do
   alias SimpleFeatures.GeometryHelper
 
   defdelegate as_ewkt(multi_point, allow_srid, allow_z, allow_m), to: GeometryHelper
-  defstruct geometries: [], srid: default_srid, binary_geometry_type: 4, text_geometry_type: "MULTIPOINT"
+  defstruct geometries: [], srid: default_srid, binary_geometry_type: 4, text_geometry_type: "MULTIPOINT", type: :multi_point
 
   @doc "Creates a new line string. Accept a sequence of coordinates as argument : ((x,y)...(x,y))"
   def from_coordinates(coordinates, srid \\ default_srid) do

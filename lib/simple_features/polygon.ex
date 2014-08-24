@@ -4,7 +4,7 @@ defmodule SimpleFeatures.Polygon do
   alias SimpleFeatures.Point
   alias __MODULE__
 
-  defstruct rings: [], srid: default_srid, binary_geometry_type: 3, text_geometry_type: "POLYGON"
+  defstruct rings: [], srid: default_srid, binary_geometry_type: 3, text_geometry_type: "POLYGON", type: :polygon
 
   @moduledoc """
   Represents a polygon. It is in 3D if the Z coordinate is not nil.
