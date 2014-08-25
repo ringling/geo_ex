@@ -75,7 +75,6 @@ defmodule SimpleFeatures.Point do
     %{ type: "Point", coordinates: to_coordinates(point) }
   end
 
-
   @doc """
   Returns `Point` as jsom
 
@@ -155,8 +154,7 @@ defmodule SimpleFeatures.Point do
     if len == 0 do
       0.0
     else
-      res = div(dot,len)
-      calculate_ort_dist(res, head, tail, c, d, point)
+      div(dot,len) |> calculate_ort_dist(head, tail, c, d, point)
     end
   end
 
@@ -222,35 +220,44 @@ defmodule SimpleFeatures.Point do
 
   @doc """
   `Point` to coordinates, e.g. [x,y,z]
-
-  TODO Should support 'with_m' analogous to from_coordinates
   """
   def to_coordinates(point) do
-    if with_z?(point), do: [point.x, point.y, point.z], else: [point.x, point.y]
+    _to_coordinates(point)
   end
 
+  defp _to_coordinates(%Point{ z: nil } = point) do
+    [point.x, point.y]
+  end
+
+  defp _to_coordinates(%Point{ m: nil } = point) do
+    [point.x, point.y, point.z]
+  end
+
+  defp _to_coordinates(point) do
+    [point.x, point.y, point.z, point.m]
+  end
 
   @doc """
   `Point` as text, e.g. "-11.2431 32.3141 34.5445"
   """
   def text_representation(point) do
-    String.rstrip text_representation(point, nil?(point.z), nil?(point.m))
+    String.rstrip _text_representation(point)
   end
 
-  defp text_representation(point, false, false) do
+  defp _text_representation(%Point{ z: nil, m: nil } = point) do
     "#{point.x} #{point.y}"
   end
 
-  defp text_representation(point, true, false) do
-    String.rstrip "#{point.x} #{point.y} #{point.z}"
+  defp _text_representation(%Point{ z: nil } = point) do
+    "#{point.x} #{point.y} #{point.m}"
   end
 
-  defp text_representation(point, false, true) do
-    String.rstrip "#{point.x} #{point.y} #{point.m}"
+  defp _text_representation(%Point{ m: nil } = point) do
+    "#{point.x} #{point.y} #{point.z}"
   end
 
-  defp text_representation(point, true, true) do
-    String.rstrip "#{point.x} #{point.y} #{point.z} #{point.m}"
+  defp _text_representation(point) do
+    "#{point.x} #{point.y} #{point.z} #{point.m}"
   end
 
   @doc "georss simple representation"
@@ -285,29 +292,31 @@ defmodule SimpleFeatures.Point do
 
   @doc "Creates a point using coordinates like 22`34 23.45N"
   def from_latlong(lat, lon, srid \\ default_srid) do
-    [x,y] = [lat, lon] |> Enum.map  fn(l) ->
-       [ _, sig, deg, min, sec, cen, _] = l |> scan |> parse_ll
-      if Regex.match?(~r/W|S/, l), do: sig = true
+    [x,y] = [lat, lon] |> Enum.map fn(coord) ->
+      [ _, sig, deg, min, sec, cen, _] = coord |> split_coordinate_string |> parse_coord
       {sec_cen, _} = Float.parse("0#{sec}#{cen}")
-      {deg,_} = Integer.parse("#{deg}")
+      {deg,_} = Integer.parse(deg)
       {min,_} = Integer.parse(min)
-      deg = trunc deg
-      min = trunc min
-      dec = deg + (min * 60 + sec_cen) / 3600
+      dec = trunc(deg) + (trunc(min) * 60 + sec_cen) / 3600
+      if negative?(coord), do: sig = true
       if sig, do: (dec * -1), else: dec
     end
     Point.from_x_y(x, y, srid)
   end
 
-  defp scan(l) do
-    List.flatten Regex.scan(~r/(-)?(\d{1,2})\D*(\d{2})\D*(\d{2})(\D*(\d{1,3}))?/, l)
+  defp negative?(coord) do
+    Regex.match?(~r/W|S/, coord)
   end
 
-  defp parse_ll([ _, sig, deg, min, sec, cen, _]) do
+  defp split_coordinate_string(str) do
+    List.flatten Regex.scan(~r/(-)?(\d{1,2})\D*(\d{2})\D*(\d{2})(\D*(\d{1,3}))?/, str)
+  end
+
+  defp parse_coord([ _, sig, deg, min, sec, cen, _]) do
     [ nil, parse_sig(sig), deg, min, sec, cen, nil]
   end
 
-  defp parse_ll([ _, sig, deg, min, sec]) do
+  defp parse_coord([ _, sig, deg, min, sec]) do
     [ nil, parse_sig(sig), deg, min, sec, "", nil]
   end
 
@@ -340,43 +349,6 @@ defmodule SimpleFeatures.Point do
     human_representation(%{ x: point.x, y: point.y }, options) |> Enum.join ", "
   end
 
-  def as_ll(point, options \\ %{}) do
-    as_latlong(point, options)
-  end
-
-  @doc """
-  Human representation of the geom, don't use directly, use:
-  as_lat, #as_long, #as_latlong
-  """
-  def human_representation(struct, options) do
-    struct
-    |> Enum.map(fn({k, v}) ->
-        deg = abs(trunc(v))
-        min = trunc(60 * (abs(v) - deg))
-        labs = abs(v * 1_000_000) / 1_000_000
-        sec = ((((labs - trunc(labs)) * 60) - trunc((labs - trunc(labs)) * 60)) * 100_000) * 60 / 100_000
-        sec = if Map.has_key?(options, :full) && options.full, do: sprintf("%.2f", [sec]), else: sprintf("%02i", [round(sec)])
-        min = sprintf("%02i", [min])
-        str = "~w°~s′~s″"
-        sec = to_string(sec)
-        if Map.has_key?(options, :coord) && options.coord do
-          out = :io_lib.format(str, [deg,min,sec]) # TODO refactor to use exprintf
-          out = out ++ cardinal_direction(k, v)
-          :erlang.iolist_to_binary(out)
-        else
-          :erlang.iolist_to_binary(:io_lib.format(str, [trunc(v),min,sec]))
-        end
-      end)
-  end
-
-  defp cardinal_direction(key, value) when key == :x do
-    if value > 0, do:  "N", else: "S"
-  end
-
-  defp cardinal_direction(key, value) when key == :y do
-    if value > 0, do: "E", else: "W"
-  end
-
   @doc """
   outputs the geometry in kml format : options are
   <tt>:id</tt>, <tt>:tesselate</tt>, <tt>:extrude</tt>,
@@ -395,7 +367,48 @@ defmodule SimpleFeatures.Point do
     out
   end
 
-  def id_attr(options) do
+  @doc """
+  Human representation of the geom, don't use directly, use:
+  as_lat, #as_long, #as_latlong
+  """
+  def human_representation(struct, options) do
+    struct
+    |> Enum.map(fn({k, v}) ->
+        deg = v |> trunc |> abs
+        sec = calculate_seconds(v, options)
+        min = calculate_minutes(v, deg)
+        str = "~w°~s′~s″"
+        if Map.has_key?(options, :coord) && options.coord do
+          out = :io_lib.format(str, [deg,min,sec]) # TODO refactor to use exprintf
+          out = out ++ cardinal_direction(k, v)
+          :erlang.iolist_to_binary(out)
+        else
+          :erlang.iolist_to_binary(:io_lib.format(str, [trunc(v),min,sec]))
+        end
+      end)
+  end
+
+  def calculate_minutes(v, deg) do
+    min = trunc(60 * (abs(v) - deg))
+    sprintf("%02i", [min])
+  end
+
+  defp calculate_seconds(v, options) do
+    labs = abs(v * 1_000_000) / 1_000_000
+    sec = ((((labs - trunc(labs)) * 60) - trunc((labs - trunc(labs)) * 60)) * 100_000) * 60 / 100_000
+    sec = if Map.has_key?(options, :full) && options.full, do: sprintf("%.2f", [sec]), else: sprintf("%02i", [round(sec)])
+    to_string(sec)
+  end
+
+  defp cardinal_direction(:x, value) do
+    if value > 0, do:  "N", else: "S"
+  end
+
+  defp cardinal_direction(:y, value) do
+    if value > 0, do: "E", else: "W"
+  end
+
+  defp id_attr(options) do
     if options[:id], do: " id=\"#{options[:id]}\"", else: ""
   end
 
@@ -415,12 +428,12 @@ defmodule SimpleFeatures.Point do
     %Point{x: x, y: y, lat: x, lng: y, z: z, m: m, srid: srid}
   end
 
-    defp head_tail(line, tail)  when tail != nil do
-    [line, tail]
+  defp head_tail(line, nil) do
+    [ List.first(line.points), List.last(line.points) ]
   end
 
-  defp head_tail(line, tail) when tail == nil do
-    [ List.first(line.points), List.last(line.points) ]
+  defp head_tail(line, tail) do
+    [line, tail]
   end
 
   defp calculate_ort_dist(res, head, tail, c, d, point) do
@@ -443,9 +456,12 @@ defmodule SimpleFeatures.Point do
     [head.x + res * c, head.y + res * d]
   end
 
+  defp _theta_rad(0.0, y) when y < 0 do
+    3 * halfpi
+  end
 
   defp _theta_rad(0.0, y) do
-    if y < 0, do: 3 * halfpi, else: halfpi
+    halfpi
   end
 
   defp _theta_rad(x, y) do

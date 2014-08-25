@@ -32,7 +32,7 @@ defmodule SimpleFeatures.GeometryCollection do
   end
 
   defp _as_map(geometry) do
-    fun = Module.function(geometry.__struct__, :as_map, 1)
+    fun = :erlang.make_fun(geometry.__struct__, :as_map, 1)
     fun.(geometry)
   end
 
@@ -61,63 +61,3 @@ defmodule SimpleFeatures.GeometryCollection do
   end
 
 end
-
-# module GeoRuby
-#   module SimpleFeatures
-#     #Represents a collection of arbitrary geometries
-#     class GeometryCollection < Geometry
-#       attr_reader :geometries
-
-#       def m_range
-#         if with_m
-#           max_m, min_m = -Float::MAX, Float::MAX
-#           each do |lr|
-#             lrmr = lr.m_range
-#             max_m = lrmr[1] if lrmr[1] > max_m
-#             min_m = lrmr[0] if lrmr[0] < min_m
-#           end
-#           [min_m,max_m]
-#         else
-#           [0,0]
-#         end
-#       end
-
-#       #Binary representation of the collection
-#       def binary_representation(allow_z=true,allow_m=true) #:nodoc:
-#         rep = [length].pack("V")
-#         #output the list of geometries without outputting the SRID first and with the same setting regarding Z and M
-#         each {|geometry| rep << geometry.as_ewkb(false,allow_z,allow_m) }
-#         rep
-#       end
-
-#       #Text representation of a geometry collection
-#       def text_representation(allow_z=true,allow_m=true) #:nodoc:
-#         @geometries.collect{|geometry| geometry.as_ewkt(false,allow_z,allow_m)}.join(",")
-#       end
-
-#       #georss simple representation : outputs only the first geometry of the collection
-#       def georss_simple_representation(options)#:nodoc:
-#         self[0].georss_simple_representation(options)
-#       end
-#       #georss w3c representation : outputs the first point of the outer ring
-#       def georss_w3cgeo_representation(options)#:nodoc:
-#         self[0].georss_w3cgeo_representation(options)
-#       end
-#       #georss gml representation : outputs only the first geometry of the collection
-#       def georss_gml_representation(options)#:nodoc:
-#         self[0].georss_gml_representation(options)
-#       end
-
-#       #outputs the geometry in kml format
-#       def kml_representation(options = {}) #:nodoc:
-#         result = "<MultiGeometry#{options[:id_attr]}>\n"
-#         options[:id_attr] = "" #the subgeometries do not have an ID
-#         each do |geometry|
-#           result += geometry.kml_representation(options)
-#         end
-#         result += "</MultiGeometry>\n"
-#       end
-
-#     end
-#   end
-# end
