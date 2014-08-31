@@ -460,7 +460,7 @@ defmodule SimpleFeatures.Point do
     3 * halfpi
   end
 
-  defp _theta_rad(0.0, y) do
+  defp _theta_rad(0.0, _y) do
     halfpi
   end
 
